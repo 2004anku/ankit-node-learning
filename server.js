@@ -1,9 +1,10 @@
 const express = require("express");
-const { handler } = require("./routes");
+const { someText, handler } = require("./routes");
 
 const server = express();
 server.use("/", (req, res, next) => {
-  console.log("This always run");
+  console.log(someText);
+  console.log("This always run", someText);
   next();
 });
 

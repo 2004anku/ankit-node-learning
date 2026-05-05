@@ -38,5 +38,5 @@ const requestHandler = (req, res) => {
 };
 // module.exports = requestHandler;
 
-exports.handler = requestHandler;
+exports.handler = requestHandler;// To connect files to server.js write the name of the function on server.js 
 exports.someText = "Some hard coded test";
