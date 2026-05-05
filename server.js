@@ -1,21 +1,24 @@
 const express = require("express");
+const { handler } = require("./routes");
 
-const app = express();
-app.use("/", (req, res, next) => {
+const server = express();
+server.use("/", (req, res, next) => {
   console.log("This always run");
   next();
 });
 
-app.use("/add-product", (req, res, next) => {
+server.use("/message", handler);
+
+server.use("/ankit", (req, res, next) => {
   console.log("In another Middleware !");
-  res.send("<h1>'The Add Product'</h1>");
+  res.send("<h1>Hello Ankit !!</h1>");
 });
 
-app.use((req, res, next) => {
+server.use((req, res, next) => {
   console.log("In another Middleware !");
   res.send("<h1>Hello From Node!!</h1>");
 });
 
-app.listen(3000, () => {
+server.listen(3000, () => {
   console.log("Server is running on port 3000 🚀");
 });
