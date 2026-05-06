@@ -1,25 +1,21 @@
+const path = require("path");
 const express = require("express");
-const { someText, handler } = require("./routes");
+const bodyParser = require("body-parser");
 
-const server = express();
-server.use("/", (req, res, next) => {
-  console.log(someText);
-  console.log("This always run", someText);
-  next();
+const app = express();
+
+const adminRouters = require("./routes/admin");
+const shopRouters = require("./routes/shop");
+
+app.use(bodyParser.urlencoded({ extended: false }));
+
+app.use("/admin", adminRouters);
+app.use(shopRouters);
+
+app.use("/", (req, res, next) => {
+  res.status(404).sendFile(path.join(__dirname, "views", "404.html"));
 });
 
-server.use("/message", handler);
-
-server.use("/ankit", (req, res, next) => {
-  console.log("In another Middleware !");
-  res.send("<h1>Hello Ankit !!</h1>");
-});
-
-server.use((req, res, next) => {
-  console.log("In another Middleware !");
-  res.send("<h1>Hello From Node!!</h1>");
-});
-
-server.listen(3000, () => {
+app.listen(3000, () => {
   console.log("Server is running on port 3000 🚀");
 });
