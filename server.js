@@ -1,5 +1,5 @@
 const path = require("path");
-const express = require("express");
+const express = require("express"); // by we can import express and use its liberay
 const bodyParser = require("body-parser");
 
 const app = express();
