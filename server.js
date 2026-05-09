@@ -12,7 +12,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use("/admin", adminRouters);
 app.use(shopRouters);
 app.use("/", (req, res, next) => {
-  console.log("hii");
+  console.log("welcome");
 });
 
 app.use("/", (req, res, next) => {
