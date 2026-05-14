@@ -1,19 +1,13 @@
-const { MongoClient } = require("mongodb");
+const mongoose = require("mongoose");
 
-const url = "mongodb://127.0.0.1:27017";
-const client = new MongoClient(url);
-
-let db;
-
-async function connectDB() {
+const connectDB = async () => {
   try {
-    await client.connect();
-    console.log("✅ MongoDB Connected");
+    await mongoose.connect("mongodb://127.0.0.1:27017/learning");
 
-    db = client.db("myDatabase");
+    console.log("✅ MongoDB Connected Successfully");
   } catch (err) {
-    console.log("❌ MongoDB Error:", err);
+    console.log("❌ MongoDB Connection Error:", err);
   }
-}
+};
 
 module.exports = { connectDB };
