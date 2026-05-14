@@ -1,25 +1,19 @@
-const path = require("path");
 const express = require("express"); // by we can import express and use its liberay
 const bodyParser = require("body-parser");
+const { connectDB } = require("./config/db");
+const adminRouter = require("./routes/admin");
 
 const app = express();
+connectDB();
 
-const adminRouters = require("./routes/admin");
-const shopRouters = require("./routes/shop");
+app.use(express.json());
 
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use("/admin", adminRouter);
 
-app.use("/admin", adminRouters);
-app.use(shopRouters);
-app.use("/", (req, res, next) => {
-  console.log("welcome");
-});
-
-app.use("/", (req, res, next) => {
-  res.status(404).sendFile(path.join(__dirname, "views", "404.html"));
+app.use((req, res) => {
+  res.status(404).send("Route not found ❌");
 });
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000 🚀");
 });
-// START LEARING MANGO
