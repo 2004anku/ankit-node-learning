@@ -1,17 +1,17 @@
-const express = require("express"); // by we can import express and use its liberay
+const express = require("express");
 
-const { connectDB } = require("./config/db");
+const connectDB = require("./config/db");
 
-const adminRouter = require("./features/admin/admin.routes");
-
+const libraryRoutes = require("./features/library/library.routes");
+const userRoutes = require("./features/user/user.routes");
 const app = express();
 
 connectDB();
 
 app.use(express.json());
 
-app.use("/admin", adminRouter);
-
+app.use("/library", libraryRoutes);
+app.use("/user", userRoutes);
 app.listen(3000, () => {
   console.log("Server is running on port 3000 🚀");
 });
