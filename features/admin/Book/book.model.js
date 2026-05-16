@@ -38,7 +38,7 @@ const bookSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
-    // Not automated libraryId is filled by us (we get the libraryId form Get_Library )
+    // Currently libraryId is assigned manually using the Library ID fetched from Get Libraries API
     libraryId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Library",
