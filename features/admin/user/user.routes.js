@@ -5,13 +5,13 @@ const router = express.Router();
 const userController = require("./user.controller");
 
 // CREATE USER
-router.post("/register", userController.createUser);
+router.post("/", userController.createUser);
 
 // GET USERS
-router.get("/all", userController.getAllUsers);
+router.get("/", userController.getAllUsers);
 
 // DELETE USER
-router.delete("/delete/:id", userController.deleteUser);
+router.delete("/:id", userController.deleteUser);
 
 // UPDATE USER
 router.patch("/:id", userController.updateUser);

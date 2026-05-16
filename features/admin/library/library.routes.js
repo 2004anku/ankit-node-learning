@@ -5,15 +5,15 @@ const router = express.Router();
 const libraryController = require("./library.controller");
 
 // LIBRARY CREATE
-router.post("/register", libraryController.registerLibrary);
+router.post("/", libraryController.registerLibrary);
 
 // LIBRARY GET
-router.get("/all", libraryController.getLibraries);
+router.get("/", libraryController.getLibraries);
 
 // LIBRARY UPDAET
-router.patch("/update/:id", libraryController.updateLibrary);
+router.patch("/:id", libraryController.updateLibrary);
 
 // LIBRARY DELETE
-router.delete("/delete/:id", libraryController.deleteLibrary);
+router.delete("/:id", libraryController.deleteLibrary);
 
 module.exports = router;
