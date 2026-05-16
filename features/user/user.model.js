@@ -2,45 +2,19 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
-    fullName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    fullName: String,
 
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-    },
+    email: String,
 
-    phone: {
-      type: String,
-      required: true,
-    },
+    phone: String,
 
-    age: {
-      type: Number,
-      min: 18,
-      max: 60,
-    },
+    age: Number,
 
-    gender: {
-      type: String,
-      enum: ["Male", "Female", "Other"],
-    },
+    gender: String,
 
-    role: {
-      type: String,
-      enum: ["Librarian", "Assistant", "Manager"],
-      default: "Assistant",
-    },
+    role: String,
 
-    salary: {
-      type: Number,
-      required: true,
-    },
+    salary: Number,
 
     joiningDate: {
       type: Date,

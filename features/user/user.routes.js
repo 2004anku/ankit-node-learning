@@ -7,11 +7,8 @@ const userController = require("./user.controller");
 // CREATE USER
 router.post("/register", userController.createUser);
 
-// GET ALL USERS
+// GET USERS
 router.get("/all", userController.getAllUsers);
-
-// GET SINGLE USER
-router.get("/:id", userController.getSingleUser);
 
 // UPDATE USER
 router.put("/update/:id", userController.updateUser);
