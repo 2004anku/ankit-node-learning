@@ -4,19 +4,17 @@ const Library = require("./library.model");
 
 const registerLibrary = async (req, res) => {
   try {
-    const newLibrary = new Library({
-      libraryName: req.body.libraryName,
-      ownerName: req.body.ownerName,
-      phone: req.body.phone,
-      address: req.body.address,
+    const newLibrary = await Library.create(req.body);
+
+    res.status(201).json({
+      success: true,
+      message: "Library registered successfully",
+      data: newLibrary,
     });
-
-    await newLibrary.save();
-
-    res.send("Library Registered");
   } catch (err) {
     res.status(500).json({
-      message: "Error registering library",
+      success: false,
+      message: "Internal server error",
       error: err.message,
     });
   }

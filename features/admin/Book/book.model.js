@@ -50,6 +50,12 @@ const bookSchema = new mongoose.Schema(
       enum: ["available", "unavailable"],
       default: "available",
     },
+
+    price: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
   },
   {
     timestamps: true,

@@ -5,31 +5,23 @@ const createUser = async (req, res) => {
   try {
     console.log("Incoming Request Body:", req.body);
 
-    const user = new User({
-      fullName: req.body.fullName,
-      email: req.body.email,
-      phone: req.body.phone,
-      age: req.body.age,
-      gender: req.body.gender,
-      role: req.body.role,
-    });
+    const user = await User.create(req.body);
 
-    console.log("User object before saving:", user);
+    console.log("User created successfully:", user);
 
-    await user.save();
-
-    res.status(201).json({
+    return res.status(201).json({
+      success: true,
       message: "User created successfully",
       data: user,
     });
   } catch (err) {
-    res.status(500).json({
+    return res.status(500).json({
+      success: false,
       message: "Error creating user",
       error: err.message,
     });
   }
 };
-
 // GET ALL USERS
 const getAllUsers = async (req, res) => {
   try {

@@ -2,40 +2,59 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
+    // 👤 BASIC AUTH INFO (REQUIRED)
     fullName: {
       type: String,
       required: true,
       trim: true,
+      minlength: 2,
+      maxlength: 50,
     },
 
     email: {
       type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
       trim: true,
+    },
+
+    password: {
+      type: String,
+      required: true,
+      minlength: 6,
+    },
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
     },
 
     phone: {
       type: String,
       unique: true,
+      sparse: true, // allows multiple null values safely
       trim: true,
     },
 
-    age: Number,
-
-    gender: String,
-
-    role: {
-      type: String,
-      default: "user",
+    age: {
+      type: Number,
+      min: 18,
+      max: 100,
     },
 
-    joiningDate: {
-      type: Date,
-      default: Date.now,
+    gender: {
+      type: String,
+      enum: ["male", "female", "other"],
     },
 
     isActive: {
       type: Boolean,
       default: true,
+    },
+
+    lastLogin: {
+      type: Date,
     },
   },
   {
