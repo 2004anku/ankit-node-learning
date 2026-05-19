@@ -3,15 +3,15 @@ const express = require("express");
 const router = express.Router();
 
 const userController = require("./user.controller");
-const auth = require("../../../middleware/auth.middleware");
+const admin = require("./../shared/middleware/isAdmin");
 
 // GET USERS
-router.get("/", auth, userController.getAllUsers);
+router.get("/", admin, userController.getAllUsers);
 
 // DELETE USER
-router.delete("/:id", auth, userController.deleteUser);
+router.delete("/:id", admin, userController.deleteUser);
 
 // UPDATE USER
-router.patch("/:id", auth, userController.updateUser);
+router.patch("/:id", admin, userController.updateUser);
 
 module.exports = router;

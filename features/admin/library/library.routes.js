@@ -3,19 +3,18 @@ const express = require("express");
 const router = express.Router();
 
 const libraryController = require("./library.controller");
-const auth = require("../../../middleware/auth.middleware");
-const isAdmin = require("../shared/middleware/isAdmin.middleware");
+const admin = require("./../shared/middleware/isAdmin");
 
 // LIBRARY CREATE
-router.post("/", auth, isAdmin, libraryController.registerLibrary);
+router.post("/", admin, libraryController.registerLibrary);
 
 // LIBRARY GET
-router.get("/", auth, libraryController.getLibraries);
+router.get("/", admin, libraryController.getLibraries);
 
 // LIBRARY UPDAET
-router.patch("/:id", auth, isAdmin, libraryController.updateLibrary);
+router.patch("/:id", admin, libraryController.updateLibrary);
 
 // LIBRARY DELETE
-router.delete("/:id", auth, isAdmin, libraryController.deleteLibrary);
+router.delete("/:id", admin, libraryController.deleteLibrary);
 
 module.exports = router;

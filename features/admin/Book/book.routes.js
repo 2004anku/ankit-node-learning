@@ -2,19 +2,18 @@ const express = require("express");
 const router = express.Router();
 
 const bookController = require("./book.controller");
-const auth = require("../../../middleware/auth.middleware");
-const isAdmin = require("../shared/middleware/isAdmin.middleware");
+const admin = require("./../shared/middleware/isAdmin");
 
 // CREATE BOOK
-router.post("/", auth, isAdmin, bookController.addBook);
+router.post("/", admin, bookController.addBook);
 
 // GET ALL BOOKS
-router.get("/", auth, bookController.getAllBooks);
+router.get("/", admin, bookController.getAllBooks);
 
 // UPDATE BOOK
-router.patch("/:id", auth, isAdmin, bookController.updateBook);
+router.patch("/:id", admin, bookController.updateBook);
 
 // DELETE BOOK
-router.delete("/:id", auth, isAdmin, bookController.deleteBook);
+router.delete("/:id", admin, bookController.deleteBook);
 
 module.exports = router;

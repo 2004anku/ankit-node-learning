@@ -2,9 +2,9 @@ const mongoose = require("mongoose");
 
 const issueSchema = new mongoose.Schema(
   {
-    userId: {
+    studentId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Student",
       required: true,
     },
 
@@ -32,6 +32,11 @@ const issueSchema = new mongoose.Schema(
     fine: {
       type: Number,
       default: 0,
+    },
+
+    finePaid: {
+      type: Boolean,
+      default: false,
     },
 
     status: {

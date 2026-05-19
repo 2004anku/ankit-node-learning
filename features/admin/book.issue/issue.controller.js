@@ -1,19 +1,19 @@
 const Issue = require("./issue.model");
 const Book = require("../book/book.model");
-const User = require("../user/user.model");
+const Student = require("../student/student.model");
 
 // ISSUE BOOK
 const issueBook = async (req, res) => {
   try {
-    const { userId, bookId, dueDate } = req.body;
+    const { studentId, bookId, dueDate } = req.body;
 
-    // CHECK USER
-    const user = await User.findById(userId);
+    // CHECK STUDENT
+    const student = await Student.findById(studentId);
 
-    if (!user) {
+    if (!student) {
       return res.status(404).json({
         success: false,
-        message: "User not found",
+        message: "Student not found",
       });
     }
 
@@ -37,7 +37,7 @@ const issueBook = async (req, res) => {
 
     // CREATE ISSUE ENTRY
     const issuedBook = await Issue.create({
-      userId,
+      studentId,
       bookId,
       dueDate,
     });
@@ -63,7 +63,7 @@ const issueBook = async (req, res) => {
 // GET ALL ISSUED BOOKS
 const getAllIssuedBooks = async (req, res) => {
   try {
-    const issues = await Issue.find().populate("userId").populate("bookId");
+    const issues = await Issue.find().populate("studentId").populate("bookId");
 
     res.status(200).json({
       success: true,
@@ -139,6 +139,14 @@ const returnBook = async (req, res) => {
 
     await issue.save();
 
+    // UPDATE STUDENT FINE
+    const student = await Student.findById(issue.studentId);
+
+    if (student) {
+      student.fine += fine;
+      await student.save();
+    }
+
     // INCREASE AVAILABLE COPIES
     book.availableCopies += 1;
 
@@ -195,6 +203,14 @@ const collectFine = async (req, res) => {
     issue.finePaid = true;
 
     await issue.save();
+
+    // UPDATE STUDENT FINE
+    const student = await Student.findById(issue.studentId);
+
+    if (student) {
+      student.fine -= issue.fine;
+      await student.save();
+    }
 
     res.status(200).json({
       success: true,
