@@ -5,13 +5,13 @@ const addBook = async (req, res) => {
   try {
     const newBook = await Book.create(req.body);
 
-    return res.status(201).json({
+    res.status(201).json({
       success: true,
       message: "Book added successfully",
       data: newBook,
     });
   } catch (error) {
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
       message: "Error while adding book",
       error: error.message,
@@ -25,13 +25,15 @@ const getAllBooks = async (req, res) => {
     const books = await Book.find().populate("libraryId");
 
     res.status(200).json({
-      message: "All Books Fetched Successfully",
+      success: true,
+      message: "All books fetched successfully",
       totalBooks: books.length,
-      books,
+      data: books,
     });
   } catch (error) {
     res.status(500).json({
-      message: "Error While Fetching Books",
+      success: false,
+      message: "Error while fetching books",
       error: error.message,
     });
   }
@@ -41,30 +43,31 @@ const getAllBooks = async (req, res) => {
 const updateBook = async (req, res) => {
   try {
     const updatedBook = await Book.findByIdAndUpdate(req.params.id, req.body, {
-      returnDocument: "after",
+      new: true,
       runValidators: true,
     });
 
     if (!updatedBook) {
       return res.status(404).json({
         success: false,
-        message: "Book Not Found",
+        message: "Book not found",
       });
     }
 
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
-      message: "Book Updated Successfully",
+      message: "Book updated successfully",
       data: updatedBook,
     });
   } catch (error) {
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
-      message: "Error While Updating Book",
+      message: "Error while updating book",
       error: error.message,
     });
   }
 };
+
 // DELETE BOOK
 const deleteBook = async (req, res) => {
   try {
@@ -72,17 +75,20 @@ const deleteBook = async (req, res) => {
 
     if (!deletedBook) {
       return res.status(404).json({
-        message: "Book Not Found",
+        success: false,
+        message: "Book not found",
       });
     }
 
     res.status(200).json({
-      message: "Book Deleted Successfully",
-      deletedBook,
+      success: true,
+      message: "Book deleted successfully",
+      data: deletedBook,
     });
   } catch (error) {
     res.status(500).json({
-      message: "Error While Deleting Book",
+      success: false,
+      message: "Error while deleting book",
       error: error.message,
     });
   }

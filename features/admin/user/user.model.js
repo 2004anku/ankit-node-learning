@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema(
     phone: {
       type: String,
       unique: true,
-      sparse: true, // allows multiple null values safely
+      sparse: true,
       trim: true,
     },
 

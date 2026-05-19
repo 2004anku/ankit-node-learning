@@ -1,7 +1,6 @@
 const Library = require("./library.model");
 
 // CREATE LIBRARY
-
 const registerLibrary = async (req, res) => {
   try {
     const newLibrary = await Library.create(req.body);
@@ -14,7 +13,7 @@ const registerLibrary = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "Error registering library",
       error: err.message,
     });
   }
@@ -26,45 +25,20 @@ const getLibraries = async (req, res) => {
     const libraries = await Library.find();
 
     res.status(200).json({
+      success: true,
       message: "Libraries fetched successfully",
       data: libraries,
     });
   } catch (err) {
     res.status(500).json({
+      success: false,
       message: "Error fetching libraries",
       error: err.message,
     });
   }
 };
 
-// DELETE LIBRARY
-
-const deleteLibrary = async (req, res) => {
-  try {
-    const id = req.params.id;
-
-    const exists = await Library.findById(id);
-
-    if (!exists) {
-      return res.status(404).json({
-        message: "Library not found",
-      });
-    }
-
-    await Library.findByIdAndDelete(id);
-
-    res.status(200).json({
-      message: "Deleted successfully",
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "Server Error",
-      error: error.message,
-    });
-  }
-};
 // UPDATE LIBRARY
-
 const updateLibrary = async (req, res) => {
   try {
     const updatedLibrary = await Library.findByIdAndUpdate(
@@ -75,17 +49,46 @@ const updateLibrary = async (req, res) => {
 
     if (!updatedLibrary) {
       return res.status(404).json({
+        success: false,
         message: "Library not found",
       });
     }
 
     res.status(200).json({
+      success: true,
       message: "Library updated successfully",
       data: updatedLibrary,
     });
   } catch (err) {
     res.status(500).json({
+      success: false,
       message: "Error updating library",
+      error: err.message,
+    });
+  }
+};
+
+// DELETE LIBRARY
+const deleteLibrary = async (req, res) => {
+  try {
+    const deletedLibrary = await Library.findByIdAndDelete(req.params.id);
+
+    if (!deletedLibrary) {
+      return res.status(404).json({
+        success: false,
+        message: "Library not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Library deleted successfully",
+      data: deletedLibrary,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Error deleting library",
       error: err.message,
     });
   }
@@ -94,6 +97,6 @@ const updateLibrary = async (req, res) => {
 module.exports = {
   registerLibrary,
   getLibraries,
-  deleteLibrary,
   updateLibrary,
+  deleteLibrary,
 };

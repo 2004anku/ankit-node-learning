@@ -1,84 +1,107 @@
 const User = require("../user/user.model");
+
 const bcrypt = require("bcryptjs");
+
 const jwt = require("jsonwebtoken");
 
 // REGISTER CONTROLLER
-
 const register = async (req, res) => {
   try {
     const { fullName, email, password, role } = req.body;
 
-    // 1. Check if user already exists
+    // CHECK USER EXISTS
     const existingUser = await User.findOne({ email });
+
     if (existingUser) {
       return res.status(400).json({
+        success: false,
         message: "User already exists",
       });
     }
 
-    // 2. Hash password
+    // HASH PASSWORD
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 3. Create user
+    // CREATE USER
     const user = await User.create({
       fullName,
       email,
       password: hashedPassword,
-      role, // optional (defaults to "user")
+      role,
     });
 
     res.status(201).json({
+      success: true,
       message: "User registered successfully",
-      user,
+      data: {
+        _id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+      },
     });
   } catch (err) {
     res.status(500).json({
-      message: err.message,
+      success: false,
+      message: "Error while registering user",
+      error: err.message,
     });
   }
 };
 
 // LOGIN CONTROLLER
-
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // 1. Find user
+    // FIND USER
     const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(404).json({
+        success: false,
         message: "User not found",
       });
     }
 
-    // 2. Check password
+    // CHECK PASSWORD
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return res.status(400).json({
+        success: false,
         message: "Invalid credentials",
       });
     }
 
-    // 3. Generate JWT token
+    // GENERATE TOKEN
     const token = jwt.sign(
       {
         id: user._id,
         role: user.role,
       },
-      "secretkey123", // 👉 move to .env later (IMPORTANT)
-      { expiresIn: "1d" },
+      "secretkey123",
+      {
+        expiresIn: "1d",
+      },
     );
 
-    res.json({
+    res.status(200).json({
+      success: true,
       message: "Login successful",
       token,
+      data: {
+        _id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+      },
     });
   } catch (err) {
     res.status(500).json({
-      message: err.message,
+      success: false,
+      message: "Error while login",
+      error: err.message,
     });
   }
 };

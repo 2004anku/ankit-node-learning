@@ -2,12 +2,45 @@ const mongoose = require("mongoose");
 
 const librarySchema = new mongoose.Schema(
   {
-    libraryName: String,
-    ownerName: String,
-    phone: Number,
-    address: String,
+    libraryName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    ownerName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
-    isActive: {
+    email: {
+      type: String,
+      required: true,
+      lowercase: true,
+      trim: true,
+    },
+
+    phone: {
+      type: String,
+      required: true,
+    },
+
+    address: {
+      type: String,
+      required: true,
+    },
+
+    city: {
+      type: String,
+      required: true,
+    },
+
+    state: {
+      type: String,
+      required: true,
+    },
+
+    isOpen: {
       type: Boolean,
       default: true,
     },
