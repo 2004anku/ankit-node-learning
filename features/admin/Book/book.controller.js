@@ -1,9 +1,47 @@
 const Book = require("./book.model");
+const bookValidationSchema = require("./book.validation");
 
 // ADD BOOK
 const addBook = async (req, res) => {
   try {
-    const newBook = await Book.create(req.body);
+    const {
+      bookName,
+      author,
+      category,
+      isbn,
+      totalCopies,
+      availableCopies,
+      libraryId,
+      price,
+    } = req.body;
+
+    // REQUIRED FIELD VALIDATION
+    const { error } = bookValidationSchema.validate(req.body);
+
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details[0].message,
+      });
+    }
+    {
+      return res.status(400).json({
+        success: false,
+        message: "All required fields must be provided",
+      });
+    }
+
+    // CREATE BOOK
+    const newBook = await Book.create({
+      bookName,
+      author,
+      category,
+      isbn,
+      totalCopies,
+      availableCopies,
+      libraryId,
+      price,
+    });
 
     res.status(201).json({
       success: true,
@@ -42,7 +80,17 @@ const getAllBooks = async (req, res) => {
 // UPDATE BOOK
 const updateBook = async (req, res) => {
   try {
-    const updatedBook = await Book.findByIdAndUpdate(req.params.id, req.body, {
+    const bookId = req.params.id;
+
+    // CHECK EMPTY BODY
+    if (Object.keys(req.body).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide data to update",
+      });
+    }
+
+    const updatedBook = await Book.findByIdAndUpdate(bookId, req.body, {
       new: true,
       runValidators: true,
     });

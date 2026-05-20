@@ -3,21 +3,20 @@ const express = require("express");
 const router = express.Router();
 
 const studentController = require("./student.controller");
-const admin = require("../shared/middleware/isAdmin");
-
+const isAdmin = require("../../../shared/middleware/isAdmin");
 // CREATE STUDENT
-router.post("/", admin, studentController.createStudent);
+router.post("/", isAdmin, studentController.createStudent);
 
 // GET ALL STUDENTS
-router.get("/", admin, studentController.getAllStudents);
+router.get("/", isAdmin, studentController.getAllStudents);
 
 // GET SINGLE STUDENT
-router.get("/:id", admin, studentController.getSingleStudent);
+router.get("/:id", isAdmin, studentController.getSingleStudent);
 
 // UPDATE STUDENT
-router.patch("/", admin, studentController.updateStudent);
+router.patch("/", isAdmin, studentController.updateStudent);
 
 // DELETE STUDENT
-router.delete("/", admin, studentController.deleteStudent);
+router.delete("/", isAdmin, studentController.deleteStudent);
 
 module.exports = router;

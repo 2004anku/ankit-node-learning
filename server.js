@@ -6,10 +6,11 @@ const libraryRoutes = require("./features/admin/library/library.routes");
 const userRoutes = require("./features/admin/user/user.routes");
 const bookRoutes = require("./features/admin/book/book.routes");
 const authRoutes = require("./features/admin/auth/auth.routes");
-const issueRoutes = require("./features/admin/book.issue/issue.routes");
+const issueRoutes = require("./features/admin/book.circulation/issue.routes");
 const studentRoutes = require("./features/admin/student/student.routes");
 
 const app = express();
+require("dotenv").config();
 
 // DATABASE CONNECTION
 connectDB();
@@ -34,6 +35,6 @@ app.get("/", (req, res) => {
 });
 
 // SERVER
-app.listen(3000, () => {
+app.listen(process.env.PORT, () => {
   console.log("Server is running on port 3000 🚀");
 });

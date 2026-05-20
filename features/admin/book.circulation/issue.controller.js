@@ -1,11 +1,47 @@
 const Issue = require("./issue.model");
 const Book = require("../book/book.model");
 const Student = require("../student/student.model");
-
+const issueValidationSchema = require("./issue.validation");
+const { calculateFine } = require("../../../shared/helpers/fine.helper");
 // ISSUE BOOK
 const issueBook = async (req, res) => {
   try {
     const { studentId, bookId, dueDate } = req.body;
+    const today = new Date();
+
+    const selectedDueDate = new Date(dueDate);
+
+    // CHECK INVALID DATE
+    if (isNaN(selectedDueDate.getTime())) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid due date format",
+      });
+    }
+
+    // CHECK PAST DATE
+    if (selectedDueDate <= today) {
+      return res.status(400).json({
+        success: false,
+        message: "Due date must be a future date",
+      });
+    }
+
+    // REQUIRED FIELD VALIDATION
+    const { error } = issueValidationSchema.validate(req.body);
+
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details[0].message,
+      });
+    }
+    {
+      return res.status(400).json({
+        success: false,
+        message: "Student ID, Book ID and Due Date are required",
+      });
+    }
 
     // CHECK STUDENT
     const student = await Student.findById(studentId);
@@ -35,6 +71,20 @@ const issueBook = async (req, res) => {
       });
     }
 
+    // CHECK IF SAME BOOK ALREADY ISSUED
+    const existingIssue = await Issue.findOne({
+      studentId,
+      bookId,
+      status: "issued",
+    });
+
+    if (existingIssue) {
+      return res.status(400).json({
+        success: false,
+        message: "Book already issued to this student",
+      });
+    }
+
     // CREATE ISSUE ENTRY
     const issuedBook = await Issue.create({
       studentId,
@@ -55,7 +105,8 @@ const issueBook = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Error while issuing book",
+      error: error.message,
     });
   }
 };
@@ -67,13 +118,15 @@ const getAllIssuedBooks = async (req, res) => {
 
     res.status(200).json({
       success: true,
+      message: "Issued books fetched successfully",
       total: issues.length,
       data: issues,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Error while fetching issued books",
+      error: error.message,
     });
   }
 };
@@ -82,6 +135,14 @@ const getAllIssuedBooks = async (req, res) => {
 const returnBook = async (req, res) => {
   try {
     const { issueId } = req.body;
+
+    // VALIDATION
+    if (!issueId) {
+      return res.status(400).json({
+        success: false,
+        message: "Issue ID is required",
+      });
+    }
 
     // FIND ISSUE RECORD
     const issue = await Issue.findById(issueId);
@@ -111,26 +172,9 @@ const returnBook = async (req, res) => {
       });
     }
 
-    // TODAY DATE
     const today = new Date();
 
-    // DEFAULT FINE
-    let fine = 0;
-
-    // DUE DATE
-    const dueDate = new Date(issue.dueDate);
-
-    // CHECK LATE RETURN
-    if (today > dueDate) {
-      // DIFFERENCE IN MILLISECONDS
-      const timeDifference = today - dueDate;
-
-      // CONVERT INTO DAYS
-      const lateDays = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
-
-      // ₹10 PER DAY
-      fine = lateDays * 10;
-    }
+    const fine = calculateFine(issue.dueDate, today);
 
     // UPDATE ISSUE RECORD
     issue.returnDate = today;
@@ -143,7 +187,9 @@ const returnBook = async (req, res) => {
     const student = await Student.findById(issue.studentId);
 
     if (student) {
-      student.fine += fine;
+      // ADD FINE TO STUDENT ACCOUNT
+      student.fine = (student.fine || 0) + fine;
+
       await student.save();
     }
 
@@ -163,7 +209,8 @@ const returnBook = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Error while returning book",
+      error: error.message,
     });
   }
 };
@@ -172,6 +219,14 @@ const returnBook = async (req, res) => {
 const collectFine = async (req, res) => {
   try {
     const { issueId } = req.params;
+
+    // VALIDATION
+    if (!issueId) {
+      return res.status(400).json({
+        success: false,
+        message: "Issue ID is required",
+      });
+    }
 
     // FIND ISSUE
     const issue = await Issue.findById(issueId);
@@ -208,7 +263,9 @@ const collectFine = async (req, res) => {
     const student = await Student.findById(issue.studentId);
 
     if (student) {
-      student.fine -= issue.fine;
+      // REDUCE PAID FINE
+      student.fine = Math.max((student.fine || 0) - issue.fine, 0);
+
       await student.save();
     }
 
@@ -223,7 +280,8 @@ const collectFine = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Error while collecting fine",
+      error: error.message,
     });
   }
 };
