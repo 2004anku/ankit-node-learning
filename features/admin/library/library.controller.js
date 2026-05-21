@@ -4,35 +4,13 @@ const libraryValidationSchema = require("./library.validation");
 // CREATE LIBRARY
 const registerLibrary = async (req, res) => {
   try {
-    const { libraryName, address, city, state, phone, email } = req.body;
-
-    // REQUIRED FIELD VALIDATION
-    const { error } = libraryValidationSchema.validate(req.body);
-
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        message: error.details[0].message,
-      });
-    }
-    {
-      return res.status(400).json({
-        success: false,
-        message: "All fields are required",
-      });
-    }
-
-    // PHONE VALIDATION
-    {
-      return res.status(400).json({
-        success: false,
-        message: "Phone number must be 10 digits",
-      });
-    }
+    const { libraryName, ownerName, address, city, state, phone, email } =
+      req.body;
 
     // CREATE LIBRARY
     const newLibrary = await Library.create({
       libraryName,
+      ownerName,
       address,
       city,
       state,

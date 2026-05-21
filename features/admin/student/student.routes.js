@@ -4,19 +4,33 @@ const router = express.Router();
 
 const studentController = require("./student.controller");
 const isAdmin = require("../../../shared/middleware/isAdmin");
-// CREATE STUDENT
-router.post("/", isAdmin, studentController.createStudent);
+
+const validate = require("../../../shared/middleware/form.validation");
+const studentValidationSchema = require("./student.validation");
 
 // GET ALL STUDENTS
-router.get("/", isAdmin, studentController.getAllStudents);
+router.get("/all-student", isAdmin, studentController.getAllStudents);
 
 // GET SINGLE STUDENT
-router.get("/:id", isAdmin, studentController.getSingleStudent);
+router.get("/single-student/:id", isAdmin, studentController.getSingleStudent);
+
+// CREATE STUDENT
+router.post(
+  "/create-student",
+  isAdmin,
+  validate(studentValidationSchema),
+  studentController.createStudent,
+);
 
 // UPDATE STUDENT
-router.patch("/", isAdmin, studentController.updateStudent);
+router.patch(
+  "/update-student/:id",
+  isAdmin,
+  validate(studentValidationSchema),
+  studentController.updateStudent,
+);
 
 // DELETE STUDENT
-router.delete("/", isAdmin, studentController.deleteStudent);
+router.delete("/remove-student/:id", isAdmin, studentController.deleteStudent);
 
 module.exports = router;

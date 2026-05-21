@@ -42,7 +42,7 @@ const issueSchema = new mongoose.Schema(
     status: {
       type: String,
 
-      enum: ["issued", "returned", "overdue", "lost", "damaged"],
+      enum: ["issued", "PENDING", "returned", "overdue", "lost", "damaged"],
 
       default: "issued",
     },

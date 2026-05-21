@@ -1,25 +1,17 @@
-const Issue = require("./issue.model");
+const Issue = require("./book-circulation.model");
 const Book = require("../book/book.model");
 const Student = require("../student/student.model");
-const issueValidationSchema = require("./issue.validation");
 const { calculateFine } = require("../../../shared/helpers/fine.helper");
+
 // ISSUE BOOK
 const issueBook = async (req, res) => {
   try {
     const { studentId, bookId, dueDate } = req.body;
-    const today = new Date();
 
+    const today = new Date();
     const selectedDueDate = new Date(dueDate);
 
-    // CHECK INVALID DATE
-    if (isNaN(selectedDueDate.getTime())) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid due date format",
-      });
-    }
-
-    // CHECK PAST DATE
+    // BUSINESS VALIDATION ONLY
     if (selectedDueDate <= today) {
       return res.status(400).json({
         success: false,
@@ -27,25 +19,7 @@ const issueBook = async (req, res) => {
       });
     }
 
-    // REQUIRED FIELD VALIDATION
-    const { error } = issueValidationSchema.validate(req.body);
-
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        message: error.details[0].message,
-      });
-    }
-    {
-      return res.status(400).json({
-        success: false,
-        message: "Student ID, Book ID and Due Date are required",
-      });
-    }
-
-    // CHECK STUDENT
     const student = await Student.findById(studentId);
-
     if (!student) {
       return res.status(404).json({
         success: false,
@@ -53,9 +27,7 @@ const issueBook = async (req, res) => {
       });
     }
 
-    // CHECK BOOK
     const book = await Book.findById(bookId);
-
     if (!book) {
       return res.status(404).json({
         success: false,
@@ -63,7 +35,6 @@ const issueBook = async (req, res) => {
       });
     }
 
-    // CHECK AVAILABLE COPIES
     if (book.availableCopies <= 0) {
       return res.status(400).json({
         success: false,
@@ -71,7 +42,6 @@ const issueBook = async (req, res) => {
       });
     }
 
-    // CHECK IF SAME BOOK ALREADY ISSUED
     const existingIssue = await Issue.findOne({
       studentId,
       bookId,
@@ -85,25 +55,22 @@ const issueBook = async (req, res) => {
       });
     }
 
-    // CREATE ISSUE ENTRY
     const issuedBook = await Issue.create({
       studentId,
       bookId,
       dueDate,
     });
 
-    // REDUCE AVAILABLE COPIES
     book.availableCopies -= 1;
-
     await book.save();
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: "Book issued successfully",
       data: issuedBook,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Error while issuing book",
       error: error.message,

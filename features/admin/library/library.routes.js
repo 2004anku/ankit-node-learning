@@ -4,16 +4,30 @@ const router = express.Router();
 
 const libraryController = require("./library.controller");
 const isAdmin = require("../../../shared/middleware/isAdmin");
+
+const validate = require("../../../shared/middleware/form.validation");
+const librayValidationSchema = require("./library.validation");
+
 // LIBRARY CREATE
-router.post("/", isAdmin, libraryController.registerLibrary);
+router.post(
+  "/create-library",
+  isAdmin,
+  validate(librayValidationSchema),
+  libraryController.registerLibrary,
+);
 
 // LIBRARY GET
-router.get("/", isAdmin, libraryController.getLibraries);
+router.get("/all-libraries", isAdmin, libraryController.getLibraries);
 
 // LIBRARY UPDAET
-router.patch("/:id", isAdmin, libraryController.updateLibrary);
+router.patch(
+  "/update-library/:id",
+  isAdmin,
+  validate(librayValidationSchema),
+  libraryController.updateLibrary,
+);
 
 // LIBRARY DELETE
-router.delete("/:id", isAdmin, libraryController.deleteLibrary);
+router.delete("/remove-library/:id", isAdmin, libraryController.deleteLibrary);
 
 module.exports = router;

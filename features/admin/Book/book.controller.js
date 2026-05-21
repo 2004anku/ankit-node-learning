@@ -4,32 +4,8 @@ const bookValidationSchema = require("./book.validation");
 // ADD BOOK
 const addBook = async (req, res) => {
   try {
-    const {
-      bookName,
-      author,
-      category,
-      isbn,
-      totalCopies,
-      availableCopies,
-      libraryId,
-      price,
-    } = req.body;
-
-    // REQUIRED FIELD VALIDATION
-    const { error } = bookValidationSchema.validate(req.body);
-
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        message: error.details[0].message,
-      });
-    }
-    {
-      return res.status(400).json({
-        success: false,
-        message: "All required fields must be provided",
-      });
-    }
+    const { bookName, author, category, isbn, totalCopies, libraryId, price } =
+      req.body;
 
     // CREATE BOOK
     const newBook = await Book.create({
@@ -38,18 +14,18 @@ const addBook = async (req, res) => {
       category,
       isbn,
       totalCopies,
-      availableCopies,
+      availableCopies: totalCopies, // AUTO SET
       libraryId,
       price,
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: "Book added successfully",
       data: newBook,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Error while adding book",
       error: error.message,
@@ -65,7 +41,6 @@ const getAllBooks = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "All books fetched successfully",
-      totalBooks: books.length,
       data: books,
     });
   } catch (error) {

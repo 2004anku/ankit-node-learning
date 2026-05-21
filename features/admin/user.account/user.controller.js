@@ -1,25 +1,9 @@
 const User = require("./user.model");
 const userValidationSchema = require("./user.validation");
-// CREATE USER
-const createUser = async (req, res) => {
+// CREATE USER ACCOUNT
+const createUserAccount = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
-
-    // REQUIRED FIELD VALIDATION
-    const { error } = userValidationSchema.validate(req.body);
-
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        message: error.details[0].message,
-      });
-    }
-    {
-      return res.status(400).json({
-        success: false,
-        message: "Name, email and password are required",
-      });
-    }
 
     // CHECK EXISTING USER
     const existingUser = await User.findOne({ email });
@@ -31,7 +15,7 @@ const createUser = async (req, res) => {
       });
     }
 
-    // CREATE USER
+    // CREATE USER ACCOUNT
     const user = await User.create({
       name,
       email,
@@ -59,7 +43,7 @@ const createUser = async (req, res) => {
 };
 
 // GET ALL USERS
-const getAllUsers = async (req, res) => {
+const getAllUserAccounts = async (req, res) => {
   try {
     // EXCLUDE PASSWORD
     const users = await User.find().select("-password");
@@ -79,8 +63,8 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-// UPDATE USER
-const updateUser = async (req, res) => {
+// UPDATE USER ACCOUNT
+const updateUserAccount = async (req, res) => {
   try {
     // CHECK EMPTY BODY
     if (Object.keys(req.body).length === 0) {
@@ -90,13 +74,17 @@ const updateUser = async (req, res) => {
       });
     }
 
-    const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    }).select("-password");
+    const updatedUserAccount = await User.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+        runValidators: true,
+      },
+    ).select("-password");
 
     // CHECK USER EXISTS
-    if (!updatedUser) {
+    if (!updatedUserAccount) {
       return res.status(404).json({
         success: false,
         message: "User not found",
@@ -106,7 +94,7 @@ const updateUser = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "User updated successfully",
-      data: updatedUser,
+      data: updatedUserAccount,
     });
   } catch (err) {
     res.status(500).json({
@@ -118,14 +106,14 @@ const updateUser = async (req, res) => {
 };
 
 // DELETE USER
-const deleteUser = async (req, res) => {
+const deleteUserAccount = async (req, res) => {
   try {
-    const deletedUser = await User.findByIdAndDelete(req.params.id).select(
-      "-password",
-    );
+    const deletedUserAccount = await User.findByIdAndDelete(
+      req.params.id,
+    ).select("-password");
 
     // CHECK USER EXISTS
-    if (!deletedUser) {
+    if (!deletedUserAccount) {
       return res.status(404).json({
         success: false,
         message: "User not found",
@@ -135,7 +123,7 @@ const deleteUser = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "User deleted successfully",
-      data: deletedUser,
+      data: deletedUserAccount,
     });
   } catch (err) {
     res.status(500).json({
@@ -147,8 +135,8 @@ const deleteUser = async (req, res) => {
 };
 
 module.exports = {
-  createUser,
-  getAllUsers,
-  updateUser,
-  deleteUser,
+  createUserAccount,
+  getAllUserAccounts,
+  updateUserAccount,
+  deleteUserAccount,
 };

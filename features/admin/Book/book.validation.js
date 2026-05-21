@@ -7,11 +7,9 @@ const bookValidationSchema = Joi.object({
 
   category: Joi.string().trim().required(),
 
-  isbn: Joi.string().trim().required(),
+  isbn: Joi.string().min(10).max(13).required(),
 
   totalCopies: Joi.number().min(1).required(),
-
-  availableCopies: Joi.number().min(0).required(),
 
   price: Joi.number().min(0).required(),
 
