@@ -23,6 +23,11 @@ router.post("/login", formValidation(loginValidation), studentLogin);
 router.get("/all-book", isStudent, studentController.getAllBooks);
 
 // REQUEST
-router.post("/request/:bookId", isStudent, requestBookIssue);
+router.post("/request-book", isStudent, requestBookIssue);
+// RETURN BOOK REQUEST
+router.patch("/return-request/:issueId", isStudent, requestBookIssue);
+
+// MY REQUEST
+router.get("/my-books", isStudent, studentController.getAllBooks);
 
 module.exports = router;

@@ -1,11 +1,79 @@
 const express = require("express");
+
 const router = express.Router();
 
 const issueController = require("./book.circulation.controller");
+
 const isAdmin = require("../../../shared/middleware/isAdmin");
+
+const isStudent = require("../../student/_shared/middleware/isStudent");
+
 const validate = require("../../../shared/middleware/form.validation");
-const issueBookValidationSchema = require("./book.circulation.validation");
-// ISSUE BOOK
+
+const {
+  issueBookValidationSchema,
+  requestBookValidationSchema,
+} = require("./book.circulation.validation");
+
+// =====================================================
+// STUDENT ROUTES
+// =====================================================
+
+// STUDENT REQUEST BOOK
+router.post(
+  "/request-book",
+  isStudent,
+  validate(requestBookValidationSchema),
+  issueController.requestBook,
+);
+
+// STUDENT RETURN REQUEST
+router.patch(
+  "/return-request/:issueId",
+  isStudent,
+  issueController.returnBookRequest,
+);
+
+// =====================================================
+// ADMIN REQUEST MANAGEMENT
+// =====================================================
+
+// GET ALL PENDING BOOK REQUESTS
+router.get("/book-requests", isAdmin, issueController.getAllBookRequests);
+
+// APPROVE BOOK REQUEST
+router.patch(
+  "/approve-request/:issueId",
+  isAdmin,
+  issueController.approveRequest,
+);
+
+// REJECT BOOK REQUEST
+router.patch(
+  "/reject-request/:issueId",
+  isAdmin,
+  issueController.rejectRequest,
+);
+
+// =====================================================
+// ADMIN RETURN MANAGEMENT
+// =====================================================
+
+// GET ALL RETURN REQUESTS
+router.get("/return-requests", isAdmin, issueController.getReturnRequests);
+
+// ACCEPT RETURN REQUEST
+router.patch(
+  "/accept-return-request/:issueId",
+  isAdmin,
+  issueController.acceptReturnRequest,
+);
+
+// =====================================================
+// DIRECT ISSUE MANAGEMENT
+// =====================================================
+
+// DIRECT ISSUE BOOK
 router.post(
   "/book-issue",
   isAdmin,
@@ -16,20 +84,11 @@ router.post(
 // GET ALL ISSUED BOOKS
 router.get("/book-issued", isAdmin, issueController.getAllIssuedBooks);
 
-// RETURN BOOK
-router.patch(
-  "/return-book/:issueId",
-  isAdmin,
-  validate(issueBookValidationSchema),
-  issueController.returnBook,
-);
+// =====================================================
+// OLD RETURN SYSTEM (OPTIONAL)
+// =====================================================
 
 // COLLECT FINE
-router.patch(
-  "/collect-fine/:issueId",
-  isAdmin,
-  validate(issueBookValidationSchema),
-  issueController.collectFine,
-);
+router.patch("/collect-fine/:issueId", isAdmin, issueController.collectFine);
 
 module.exports = router;

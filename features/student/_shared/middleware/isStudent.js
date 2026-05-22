@@ -14,7 +14,6 @@ const isStudent = (req, res, next) => {
 
     // VERIFY TOKEN
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
     // CHECK ROLE
     if (decoded.role !== "STUDENT") {
       return res.status(403).json({
@@ -22,8 +21,7 @@ const isStudent = (req, res, next) => {
         message: "Student access only",
       });
     }
-
-    // STORE USER DATA
+    // STORE student DATA
     req.student = decoded;
     next();
   } catch (error) {

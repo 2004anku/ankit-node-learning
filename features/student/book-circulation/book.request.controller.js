@@ -8,9 +8,8 @@ const requestBookIssue = async (req, res) => {
   try {
     // GET LOGGED IN STUDENT ID
     const studentId = req.student.id;
-
     // GET BOOK ID FROM PARAMS
-    const { bookId } = req.params;
+    const { bookId } = req.body;
 
     // CHECK BOOK EXISTS
     const book = await Book.findById(bookId);
@@ -35,7 +34,7 @@ const requestBookIssue = async (req, res) => {
       studentId,
       bookId,
       status: {
-        $in: ["PENDING", "ISSUED"],
+        $in: ["pending", "issued"],
       },
     });
 
@@ -46,17 +45,11 @@ const requestBookIssue = async (req, res) => {
       });
     }
 
-    // CREATE DUE DATE (7 DAYS)
-    const dueDate = new Date();
-
-    dueDate.setDate(dueDate.getDate() + 7);
-
     // CREATE REQUEST
     const request = await BookCirculation.create({
       studentId,
       bookId,
-      dueDate,
-      status: "PENDING",
+      status: "pending",
     });
 
     return res.status(201).json({
@@ -73,6 +66,78 @@ const requestBookIssue = async (req, res) => {
   }
 };
 
+const getMyBooks = async (req, res) => {
+  try {
+    const books = await Issue.find({
+      studentId: req.user.id,
+      status: "issued",
+    }).populate("bookId");
+
+    return res.status(200).json({
+      success: true,
+      total: books.length,
+      data: books,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error while fetching books",
+      error: error.message,
+    });
+  }
+};
+
+const returnBookRequest = async (req, res) => {
+  try {
+    const studentId = req.student.id;
+
+    const { issueId } = req.params;
+
+    const issue = await BookCirculation.findById(issueId);
+
+    if (!issue) {
+      return res.status(404).json({
+        success: false,
+        message: "Issue record not found",
+      });
+    }
+
+    // SECURITY CHECK
+    if (issue.studentId.toString() !== studentId) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized access",
+      });
+    }
+
+    // ONLY ISSUED BOOK CAN BE RETURNED
+    if (issue.status !== "issued") {
+      return res.status(400).json({
+        success: false,
+        message: "Only issued books can be returned",
+      });
+    }
+
+    // SEND RETURN REQUEST
+    issue.status = "return-pending";
+
+    await issue.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Return request sent successfully",
+      data: issue,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error while sending return request",
+      error: error.message,
+    });
+  }
+};
 module.exports = {
   requestBookIssue,
+  getMyBooks,
+  returnBookRequest,
 };
