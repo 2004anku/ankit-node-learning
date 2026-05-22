@@ -31,7 +31,8 @@ const studentLogin = async (req, res) => {
     const token = jwt.sign(
       {
         id: student._id,
-        role: student.role,
+        email: student.email,
+        role: "STUDENT",
       },
       process.env.JWT_SECRET,
       {

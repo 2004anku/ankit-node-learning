@@ -8,7 +8,7 @@ const isStudent = require("../_shared/middleware/isStudent");
 
 const formValidation = require("../../../shared/middleware/form.validation");
 
-const { loginValidation } = require("./student.validation");
+const loginValidation = require("./student.validation");
 
 const { studentLogin } = require("../auth/auth.controller");
 const {
@@ -24,4 +24,5 @@ router.get("/all-book", isStudent, studentController.getAllBooks);
 
 // REQUEST
 router.post("/request/:bookId", isStudent, requestBookIssue);
+
 module.exports = router;

@@ -24,8 +24,7 @@ const isStudent = (req, res, next) => {
     }
 
     // STORE USER DATA
-    req.user = decoded;
-
+    req.student = decoded;
     next();
   } catch (error) {
     res.status(401).json({

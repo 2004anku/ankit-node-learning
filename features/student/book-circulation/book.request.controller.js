@@ -6,8 +6,10 @@ const Book = require("../../admin/book/book.model");
 
 const requestBookIssue = async (req, res) => {
   try {
-    const studentId = req.user.id;
+    // GET LOGGED IN STUDENT ID
+    const studentId = req.student.id;
 
+    // GET BOOK ID FROM PARAMS
     const { bookId } = req.params;
 
     // CHECK BOOK EXISTS
@@ -20,38 +22,53 @@ const requestBookIssue = async (req, res) => {
       });
     }
 
+    // CHECK BOOK STOCK
+    if (book.availableCopies <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Book is out of stock",
+      });
+    }
+
     // CHECK ALREADY REQUESTED
     const alreadyRequested = await BookCirculation.findOne({
-      student: studentId,
-      book: bookId,
+      studentId,
+      bookId,
       status: {
-        $in: ["PENDING"],
+        $in: ["PENDING", "ISSUED"],
       },
     });
 
     if (alreadyRequested) {
       return res.status(400).json({
         success: false,
-        message: "Book already requested",
+        message: "Book already requested or already issued",
       });
     }
 
+    // CREATE DUE DATE (7 DAYS)
+    const dueDate = new Date();
+
+    dueDate.setDate(dueDate.getDate() + 7);
+
     // CREATE REQUEST
     const request = await BookCirculation.create({
-      student: studentId,
-      book: bookId,
+      studentId,
+      bookId,
+      dueDate,
       status: "PENDING",
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
-      message: "Book issue request sent",
+      message: "Book request sent successfully",
       data: request,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Error while requesting book",
+      error: error.message,
     });
   }
 };
