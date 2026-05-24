@@ -1,6 +1,6 @@
 const User = require("../user.account/user.model");
 
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcrypt");
 
 const jwt = require("jsonwebtoken");
 
@@ -30,18 +30,21 @@ const register = async (req, res) => {
       role,
     });
 
-    res.status(201).json({
+    // SAFE RESPONSE
+    const safeUser = {
+      id: user._id,
+      fullName: user.fullName,
+      email: user.email,
+      role: user.role,
+    };
+
+    return res.status(201).json({
       success: true,
       message: "User registered successfully",
-      data: {
-        _id: user._id,
-        fullName: user.fullName,
-        email: user.email,
-        role: user.role,
-      },
+      data: safeUser,
     });
   } catch (err) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Error while registering user",
       error: err.message,
@@ -58,9 +61,9 @@ const login = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(404).json({
+      return res.status(401).json({
         success: false,
-        message: "User not found",
+        message: "Invalid email or password",
       });
     }
 
@@ -68,9 +71,9 @@ const login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
-        message: "Invalid credentials",
+        message: "Invalid email or password",
       });
     }
 
@@ -86,19 +89,22 @@ const login = async (req, res) => {
       },
     );
 
-    res.status(200).json({
+    // SAFE RESPONSE
+    const safeUser = {
+      id: user._id,
+      fullName: user.fullName,
+      email: user.email,
+      role: user.role,
+    };
+
+    return res.status(200).json({
       success: true,
       message: "Login successful",
       token,
-      data: {
-        _id: user._id,
-        fullName: user.fullName,
-        email: user.email,
-        role: user.role,
-      },
+      data: safeUser,
     });
   } catch (err) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Error while login",
       error: err.message,

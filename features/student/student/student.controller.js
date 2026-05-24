@@ -20,25 +20,28 @@ const getStudentProfile = async (req, res) => {
   }
 };
 
-// ================= GET ALL BOOKS =================
+const Issue = require("../../admin/book-circulation/book-circulation.model");
+// ================= GET ALL LIBRARY BOOKS =================
 
 const getAllBooks = async (req, res) => {
   try {
+    // FETCH ALL BOOKS
     const books = await Book.find();
 
-    res.status(200).json({
+    // RESPONSE
+    return res.status(200).json({
       success: true,
       count: books.length,
       data: books,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Error while fetching books",
+      error: error.message,
     });
   }
 };
-
 module.exports = {
   getStudentProfile,
   getAllBooks,

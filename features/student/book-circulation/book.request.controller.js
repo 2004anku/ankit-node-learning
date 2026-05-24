@@ -7,8 +7,9 @@ const Book = require("../../admin/book/book.model");
 const requestBookIssue = async (req, res) => {
   try {
     // GET LOGGED IN STUDENT ID
-    const studentId = req.student.id;
-    // GET BOOK ID FROM PARAMS
+    const studentId = req.user.id;
+
+    // GET BOOK ID
     const { bookId } = req.body;
 
     // CHECK BOOK EXISTS
@@ -66,9 +67,11 @@ const requestBookIssue = async (req, res) => {
   }
 };
 
+// ================= GET MY BOOKS =================
+
 const getMyBooks = async (req, res) => {
   try {
-    const books = await Issue.find({
+    const books = await BookCirculation.find({
       studentId: req.user.id,
       status: "issued",
     }).populate("bookId");
@@ -87,9 +90,11 @@ const getMyBooks = async (req, res) => {
   }
 };
 
+// ================= RETURN BOOK REQUEST =================
+
 const returnBookRequest = async (req, res) => {
   try {
-    const studentId = req.student.id;
+    const studentId = req.user.id;
 
     const { issueId } = req.params;
 
@@ -103,10 +108,18 @@ const returnBookRequest = async (req, res) => {
     }
 
     // SECURITY CHECK
-    if (issue.studentId.toString() !== studentId) {
+    if (issue.studentId.toString() !== studentId.toString()) {
       return res.status(403).json({
         success: false,
         message: "Unauthorized access",
+      });
+    }
+
+    // CHECK ALREADY PENDING
+    if (issue.status === "return-pending") {
+      return res.status(400).json({
+        success: false,
+        message: "Return request already pending",
       });
     }
 
@@ -136,6 +149,7 @@ const returnBookRequest = async (req, res) => {
     });
   }
 };
+
 module.exports = {
   requestBookIssue,
   getMyBooks,

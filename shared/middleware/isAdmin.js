@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 
 const isAdmin = (req, res, next) => {
   try {
+    // GET TOKEN
     const token = req.headers.authorization?.split(" ")[1];
 
     if (!token) {
@@ -11,8 +12,10 @@ const isAdmin = (req, res, next) => {
       });
     }
 
+    // VERIFY TOKEN
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+    // CHECK ROLE
     if (decoded.role !== "admin") {
       return res.status(403).json({
         success: false,
@@ -20,11 +23,15 @@ const isAdmin = (req, res, next) => {
       });
     }
 
-    req.user = decoded;
+    // ATTACH USER
+    req.user = {
+      id: decoded.id,
+      role: decoded.role,
+    };
 
     next();
   } catch (error) {
-    res.status(401).json({
+    return res.status(401).json({
       success: false,
       message: "Invalid token",
       error: error.message,

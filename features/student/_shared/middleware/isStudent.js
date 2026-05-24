@@ -2,30 +2,37 @@ const jwt = require("jsonwebtoken");
 
 const isStudent = (req, res, next) => {
   try {
-    const token = req.headers.authorization?.split(" ")[1];
+    // GET TOKEN
+    const authHeader = req.headers.authorization;
 
-    // CHECK TOKEN
-    if (!token) {
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({
         success: false,
         message: "No token provided",
       });
     }
 
+    const token = authHeader.split(" ")[1];
     // VERIFY TOKEN
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
     // CHECK ROLE
-    if (decoded.role !== "STUDENT") {
+    if (decoded.role !== "student") {
       return res.status(403).json({
         success: false,
         message: "Student access only",
       });
     }
-    // STORE student DATA
-    req.student = decoded;
+
+    // STORE USER DATA
+    req.user = {
+      id: decoded.id,
+      role: decoded.role,
+    };
+
     next();
   } catch (error) {
-    res.status(401).json({
+    return res.status(401).json({
       success: false,
       message: "Invalid token",
       error: error.message,

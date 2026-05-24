@@ -31,8 +31,7 @@ const studentLogin = async (req, res) => {
     const token = jwt.sign(
       {
         id: student._id,
-        email: student.email,
-        role: "STUDENT",
+        role: "student",
       },
       process.env.JWT_SECRET,
       {
@@ -40,20 +39,23 @@ const studentLogin = async (req, res) => {
       },
     );
 
+    // SAFE RESPONSE DATA
+    const safeStudent = {
+      id: student._id,
+      fullName: student.fullName,
+      email: student.email,
+      role: "student",
+    };
+
     // RESPONSE
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Login successful",
       token,
-      data: {
-        id: student._id,
-        fullName: student.fullName,
-        email: student.email,
-        role: student.role,
-      },
+      data: safeStudent,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
