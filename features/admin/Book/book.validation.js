@@ -1,13 +1,16 @@
 const Joi = require("joi");
 
-const bookValidationSchema = Joi.object({
+const createBookValidationSchema = Joi.object({
   bookName: Joi.string().trim().required(),
 
   author: Joi.string().trim().required(),
 
   category: Joi.string().trim().required(),
 
-  isbn: Joi.string().min(10).max(13).required(),
+  isbn: Joi.string().min(10).max(13).required().messages({
+    "string.min": "ISBN must be at least 10 characters",
+    "string.max": "ISBN cannot exceed 13 characters",
+  }),
 
   totalCopies: Joi.number().min(1).required(),
 
@@ -16,4 +19,26 @@ const bookValidationSchema = Joi.object({
   libraryId: Joi.string().required(),
 });
 
-module.exports = bookValidationSchema;
+const updateBookValidationSchema = Joi.object({
+  bookName: Joi.string().trim(),
+
+  author: Joi.string().trim(),
+
+  category: Joi.string().trim(),
+
+  isbn: Joi.string().min(10).max(13).messages({
+    "string.min": "ISBN must be at least 10 characters",
+    "string.max": "ISBN cannot exceed 13 characters",
+  }),
+
+  totalCopies: Joi.number().min(1),
+
+  price: Joi.number().min(0),
+
+  libraryId: Joi.string(),
+});
+
+module.exports = {
+  createBookValidationSchema,
+  updateBookValidationSchema,
+};

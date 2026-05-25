@@ -1,5 +1,6 @@
+const { required } = require("joi");
 const mongoose = require("mongoose");
-
+const addressSchema = require("../../../shared/schema/address.schema");
 const librarySchema = new mongoose.Schema(
   {
     libraryName: {
@@ -7,6 +8,7 @@ const librarySchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+
     ownerName: {
       type: String,
       required: true,
@@ -16,6 +18,7 @@ const librarySchema = new mongoose.Schema(
     email: {
       type: String,
       required: true,
+      unique: true,
       lowercase: true,
       trim: true,
     },
@@ -23,26 +26,26 @@ const librarySchema = new mongoose.Schema(
     phone: {
       type: String,
       required: true,
+      unique: true,
     },
 
-    address: {
+    address: addressSchema,
+
+    workingHours: {
+      open: String,
+      close: String,
+    },
+
+    status: {
       type: String,
-      required: true,
+      enum: ["active", "inactive", "suspended"],
+      default: "active",
     },
 
-    city: {
+    plan: {
       type: String,
-      required: true,
-    },
-
-    state: {
-      type: String,
-      required: true,
-    },
-
-    isOpen: {
-      type: Boolean,
-      default: true,
+      enum: ["free", "premium"],
+      default: "free",
     },
   },
   {

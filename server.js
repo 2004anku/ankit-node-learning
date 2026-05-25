@@ -27,14 +27,6 @@ app.use("/api-1/admin/book-circulation", issueRoutes);
 app.use("/api-1/admin/student", studentRoutes);
 app.use("/api-1/student", studentRoute);
 
-// DEFAULT ROUTE (only for check)
-app.get("/", (req, res) => {
-  res.json({
-    success: true,
-    message: "Library Management System API Running 🚀",
-  });
-});
-
 // SERVER
 app.listen(process.env.PORT, () => {
   console.log("Server is running on port 3000 🚀");

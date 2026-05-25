@@ -33,4 +33,7 @@ router.post("/request-book", isStudent, requestBookIssue);
 // RETURN BOOK REQUEST
 router.patch("/return-request/:issueId", isStudent, returnBookRequest);
 
+// GET MY PROFILE
+router.get("/profile", isStudent, studentController.getStudentProfile);
+
 module.exports = router;

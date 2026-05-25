@@ -6,13 +6,16 @@ const libraryController = require("./library.controller");
 const isAdmin = require("../../../shared/middleware/isAdmin");
 
 const validate = require("../../../shared/middleware/form.validation");
-const librayValidationSchema = require("./library.validation");
+const {
+  createLibraryValidationSchema,
+  updateLibraryValidationSchema,
+} = require("./library.validation");
 
 // LIBRARY CREATE
 router.post(
   "/create-library",
   isAdmin,
-  validate(librayValidationSchema),
+  validate(createLibraryValidationSchema),
   libraryController.registerLibrary,
 );
 
@@ -23,7 +26,7 @@ router.get("/all-libraries", isAdmin, libraryController.getLibraries);
 router.patch(
   "/update-library/:id",
   isAdmin,
-  validate(librayValidationSchema),
+  validate(updateLibraryValidationSchema),
   libraryController.updateLibrary,
 );
 

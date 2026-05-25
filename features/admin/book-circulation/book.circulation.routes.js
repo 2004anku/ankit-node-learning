@@ -11,8 +11,11 @@ const isStudent = require("../../student/_shared/middleware/isStudent");
 const validate = require("../../../shared/middleware/form.validation");
 
 const {
-  issueBookValidationSchema,
   requestBookValidationSchema,
+  issueBookValidationSchema,
+  approveRequestValidationSchema,
+  returnBookValidationSchema,
+  collectFineValidationSchema,
 } = require("./book.circulation.validation");
 
 // =====================================================
@@ -83,10 +86,6 @@ router.post(
 
 // GET ALL ISSUED BOOKS
 router.get("/book-issued", isAdmin, issueController.getAllIssuedBooks);
-
-// =====================================================
-// OLD RETURN SYSTEM (OPTIONAL)
-// =====================================================
 
 // COLLECT FINE
 router.patch("/collect-fine/:issueId", isAdmin, issueController.collectFine);

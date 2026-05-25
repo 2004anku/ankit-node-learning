@@ -7,13 +7,16 @@ const isAdmin = require("../../../shared/middleware/isAdmin");
 
 const validate = require("../../../shared/middleware/form.validation");
 
-const bookValidationSchema = require("./book.validation");
+const {
+  createBookValidationSchema,
+  updateBookValidationSchema,
+} = require("./book.validation");
 
 // CREATE BOOK
 router.post(
   "/create-book",
   isAdmin,
-  validate(bookValidationSchema),
+  validate(createBookValidationSchema),
   bookController.addBook,
 );
 
@@ -24,7 +27,7 @@ router.get("/all-books", isAdmin, bookController.getAllBooks);
 router.patch(
   "/update-book/:id",
   isAdmin,
-  validate(bookValidationSchema),
+  validate(updateBookValidationSchema),
   bookController.updateBook,
 );
 

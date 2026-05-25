@@ -6,8 +6,10 @@ const studentController = require("./student.controller");
 const isAdmin = require("../../../shared/middleware/isAdmin");
 
 const validate = require("../../../shared/middleware/form.validation");
-const studentValidationSchema = require("./student.validation");
-
+const {
+  createStudentValidationSchema,
+  updateStudentValidationSchema,
+} = require("./student.validation");
 // GET ALL STUDENTS
 router.get("/all-student", isAdmin, studentController.getAllStudents);
 
@@ -18,7 +20,7 @@ router.get("/single-student/:id", isAdmin, studentController.getSingleStudent);
 router.post(
   "/create-student",
   isAdmin,
-  validate(studentValidationSchema),
+  validate(createStudentValidationSchema),
   studentController.createStudent,
 );
 
@@ -26,7 +28,7 @@ router.post(
 router.patch(
   "/update-student/:id",
   isAdmin,
-  validate(studentValidationSchema),
+  validate(updateStudentValidationSchema),
   studentController.updateStudent,
 );
 
