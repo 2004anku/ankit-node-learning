@@ -16,15 +16,27 @@ const issueSchema = new mongoose.Schema(
       required: true,
     },
 
+    // ADMIN WHO ISSUED THE BOOK
+    issuedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
+    // ADMIN WHO ACCEPTED THE RETURN
+    returnedTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
     // ISSUE DATE
-    // ONLY ADDED WHEN ADMIN APPROVES REQUEST
     issueDate: {
       type: Date,
       default: null,
     },
 
     // DUE DATE
-    // NOT REQUIRED FOR PENDING REQUEST
     dueDate: {
       type: Date,
       default: null,

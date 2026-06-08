@@ -59,7 +59,6 @@ const requestBook = async (req, res) => {
     });
   }
 };
-
 // ==========================================
 // ADMIN GET ALL PENDING REQUESTS
 // ==========================================
@@ -68,8 +67,10 @@ const getAllBookRequests = async (req, res) => {
     const requests = await Issue.find({
       status: "pending",
     })
-      .populate("studentId")
-      .populate("bookId");
+      .populate("studentId", "fullName")
+      .populate("bookId")
+      .populate("issuedBy", "fullName")
+      .populate("returnedTo", "fullName");
 
     return res.status(200).json({
       success: true,
@@ -151,12 +152,13 @@ const approveRequest = async (req, res) => {
     dueDate.setDate(dueDate.getDate() + 90);
 
     // UPDATE ISSUE
+    // UPDATE ISSUE
     issue.status = "issued";
     issue.issueDate = new Date();
     issue.dueDate = dueDate;
+    issue.issuedBy = req.user.id;
 
     await issue.save();
-
     // REDUCE BOOK COPIES
     book.availableCopies -= 1;
 
@@ -271,15 +273,14 @@ const issueBook = async (req, res) => {
         message: "Book already issued to this student",
       });
     }
-
     const issuedBook = await Issue.create({
       studentId,
       bookId,
       dueDate,
       issueDate: new Date(),
       status: "issued",
+      issuedBy: req.user.id,
     });
-
     book.availableCopies -= 1;
 
     await book.save();
@@ -306,8 +307,10 @@ const getAllIssuedBooks = async (req, res) => {
     const issues = await Issue.find({
       status: "issued",
     })
-      .populate("studentId")
-      .populate("bookId");
+      .populate("studentId", "fullName")
+      .populate("bookId")
+      .populate("issuedBy", "fullName")
+      .populate("returnedTo", "fullName");
 
     res.status(200).json({
       success: true,
@@ -323,7 +326,6 @@ const getAllIssuedBooks = async (req, res) => {
     });
   }
 };
-
 // ==========================================
 // STUDENT RETURN REQUEST
 // ==========================================
@@ -385,8 +387,10 @@ const getReturnRequests = async (req, res) => {
     const requests = await Issue.find({
       status: "return-pending",
     })
-      .populate("studentId")
-      .populate("bookId");
+      .populate("studentId", "fullName")
+      .populate("bookId")
+      .populate("issuedBy", "fullName")
+      .populate("returnedTo", "fullName");
 
     return res.status(200).json({
       success: true,
@@ -442,9 +446,9 @@ const acceptReturnRequest = async (req, res) => {
     issue.returnDate = today;
     issue.status = "returned";
     issue.fine = fine;
+    issue.returnedTo = req.user.id;
 
     await issue.save();
-
     // UPDATE STUDENT FINE
     const student = await Student.findById(issue.studentId);
 
