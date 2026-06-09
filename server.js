@@ -9,6 +9,7 @@ const authRoutes = require("./features/admin/auth/auth.routes");
 const issueRoutes = require("./features/admin/book-circulation/book.circulation.routes");
 const studentRoutes = require("./features/admin/student/student.routes");
 const studentRoute = require("./features/student/student/student.routes");
+const dashboardRoute = require("./features/admin/dashboard/dashboard.routes");
 const app = express();
 require("dotenv").config();
 
@@ -26,6 +27,7 @@ app.use("/api-1/admin/books", bookRoutes);
 app.use("/api-1/admin/book-circulation", issueRoutes);
 app.use("/api-1/admin/student", studentRoutes);
 app.use("/api-1/student", studentRoute);
+app.use("/api-1/admin/dashboard", dashboardRoute);
 
 // SERVER
 app.listen(process.env.PORT, () => {
