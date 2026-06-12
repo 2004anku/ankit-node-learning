@@ -1,4 +1,4 @@
-const User = require("../user.account/user.model");
+const User = require("../useraccount/user.model");
 
 const bcrypt = require("bcrypt");
 
@@ -97,10 +97,17 @@ const login = async (req, res) => {
       role: user.role,
     };
 
+    // SAVE TOKEN IN COOKIE
     return res.status(200).json({
       success: true,
       message: "Login successful",
       token,
+      data: safeUser,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Login successful",
       data: safeUser,
     });
   } catch (err) {
@@ -111,7 +118,6 @@ const login = async (req, res) => {
     });
   }
 };
-
 module.exports = {
   register,
   login,

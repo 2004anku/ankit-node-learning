@@ -2,15 +2,17 @@ const jwt = require("jsonwebtoken");
 
 const isAdmin = (req, res, next) => {
   try {
-    // GET TOKEN
-    const token = req.headers.authorization?.split(" ")[1];
+    // GET TOKEN FROM AUTH HEADER
+    const authHeader = req.headers.authorization;
 
-    if (!token) {
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({
         success: false,
         message: "No token provided",
       });
     }
+
+    const token = authHeader.split(" ")[1];
 
     // VERIFY TOKEN
     const decoded = jwt.verify(token, process.env.JWT_SECRET);

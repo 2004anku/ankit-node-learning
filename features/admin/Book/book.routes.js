@@ -22,7 +22,6 @@ router.post(
 
 // GET ALL BOOKS
 router.get("/all-books", isAdmin, bookController.getAllBooks);
-
 // UPDATE BOOK
 router.patch(
   "/update-book/:id",

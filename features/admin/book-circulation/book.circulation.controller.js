@@ -64,13 +64,11 @@ const requestBook = async (req, res) => {
 // ==========================================
 const getAllBookRequests = async (req, res) => {
   try {
-    const requests = await Issue.find({
-      status: "pending",
-    })
-      .populate("studentId", "fullName")
+    const requests = await Issue.find()
+      .populate("studentId", "studentName")
       .populate("bookId")
-      .populate("issuedBy", "fullName")
-      .populate("returnedTo", "fullName");
+      .populate("issuedBy", "studentName")
+      .populate("returnedTo", "studentName");
 
     return res.status(200).json({
       success: true,
