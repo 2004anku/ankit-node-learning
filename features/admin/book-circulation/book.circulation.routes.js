@@ -76,13 +76,7 @@ router.patch(
 // DIRECT ISSUE MANAGEMENT
 // =====================================================
 
-// DIRECT ISSUE BOOK
-router.post(
-  "/book-issue",
-  isAdmin,
-  validate(issueBookValidationSchema),
-  issueController.issueBook,
-);
+router.post("/assign-book", isAdmin, issueController.assignBookToStudent);
 
 // GET ALL ISSUED BOOKS
 router.get("/book-issued", isAdmin, issueController.getAllIssuedBooks);

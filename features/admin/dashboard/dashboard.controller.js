@@ -1,6 +1,6 @@
 const Book = require("../book/book.model");
 const Student = require("../student/student.model");
-const Issue = require("../book-circulation/book-circulation.model");
+const Issue = require("../book-circulation/book.circulation.model");
 
 const getDashboardStats = async (req, res) => {
   try {

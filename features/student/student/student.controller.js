@@ -20,7 +20,7 @@ const getStudentProfile = async (req, res) => {
   }
 };
 
-const Issue = require("../../admin/book-circulation/book-circulation.model");
+const Issue = require("../../admin/book-circulation/book.circulation.model");
 // ================= GET ALL LIBRARY BOOKS =================
 
 const getAllBooks = async (req, res) => {

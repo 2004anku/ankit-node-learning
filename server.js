@@ -35,7 +35,7 @@ app.use("/api/1/admin/users", userRoutes);
 app.use("/api/1/admin/books", bookRoutes);
 app.use("/api/1/admin/book-circulation", issueRoutes);
 app.use("/api/1/admin/student", studentRoutes);
-app.use("/api/1/student", studentRoute);
+app.use("/api/1/students", studentRoute);
 app.use("/api/1/admin/dashboard", dashboardRoutes);
 
 // SERVER

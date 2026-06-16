@@ -1,4 +1,4 @@
-const Issue = require("./book-circulation.model");
+const Issue = require("./book.circulation.model");
 const Book = require("../book/book.model");
 const Student = require("../student/student.model");
 const { calculateFine } = require("../../../shared/helpers/fine.helper");
@@ -218,22 +218,13 @@ const rejectRequest = async (req, res) => {
 };
 
 // ==========================================
-// ISSUE BOOK (DIRECT ADMIN ISSUE)
+// ADMIN ASSIGN BOOK TO STUDENT
 // ==========================================
-const issueBook = async (req, res) => {
+const assignBookToStudent = async (req, res) => {
   try {
     const { studentId, bookId, dueDate } = req.body;
 
-    const today = new Date();
-    const selectedDueDate = new Date(dueDate);
-
-    if (selectedDueDate <= today) {
-      return res.status(400).json({
-        success: false,
-        message: "Due date must be a future date",
-      });
-    }
-
+    // CHECK STUDENT
     const student = await Student.findById(studentId);
 
     if (!student) {
@@ -243,6 +234,7 @@ const issueBook = async (req, res) => {
       });
     }
 
+    // CHECK BOOK
     const book = await Book.findById(bookId);
 
     if (!book) {
@@ -252,6 +244,7 @@ const issueBook = async (req, res) => {
       });
     }
 
+    // CHECK BOOK AVAILABILITY
     if (book.availableCopies <= 0) {
       return res.status(400).json({
         success: false,
@@ -259,44 +252,69 @@ const issueBook = async (req, res) => {
       });
     }
 
+    // PREVENT DUPLICATE ACTIVE ISSUES
     const existingIssue = await Issue.findOne({
       studentId,
       bookId,
-      status: "issued",
+      status: {
+        $in: ["issued", "return-pending"],
+      },
     });
 
     if (existingIssue) {
       return res.status(400).json({
         success: false,
-        message: "Book already issued to this student",
+        message: "This student already has this book",
       });
     }
-    const issuedBook = await Issue.create({
+
+    // CALCULATE DUE DATE
+    let finalDueDate;
+
+    if (dueDate) {
+      finalDueDate = new Date(dueDate);
+
+      if (finalDueDate <= new Date()) {
+        return res.status(400).json({
+          success: false,
+          message: "Due date must be a future date",
+        });
+      }
+    } else {
+      finalDueDate = new Date();
+
+      // DEFAULT: 90 DAYS
+      finalDueDate.setDate(finalDueDate.getDate() + 90);
+    }
+
+    // CREATE ISSUE RECORD
+    const assignedBook = await Issue.create({
       studentId,
       bookId,
-      dueDate,
       issueDate: new Date(),
+      dueDate: finalDueDate,
       status: "issued",
       issuedBy: req.user.id,
     });
+
+    // REDUCE AVAILABLE COPIES
     book.availableCopies -= 1;
 
     await book.save();
 
     return res.status(201).json({
       success: true,
-      message: "Book issued successfully",
-      data: issuedBook,
+      message: "Book assigned successfully",
+      data: assignedBook,
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "Error while issuing book",
+      message: "Error while assigning book",
       error: error.message,
     });
   }
 };
-
 // ==========================================
 // GET ALL ISSUED BOOKS
 // ==========================================
@@ -548,7 +566,7 @@ module.exports = {
   getAllBookRequests,
   approveRequest,
   rejectRequest,
-  issueBook,
+  assignBookToStudent,
   getAllIssuedBooks,
   returnBookRequest,
   getReturnRequests,

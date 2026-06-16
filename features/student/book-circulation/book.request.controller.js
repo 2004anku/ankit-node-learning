@@ -1,4 +1,4 @@
-const BookCirculation = require("../../admin/book-circulation/book-circulation.model");
+const BookCirculation = require("../../admin/book-circulation/book.circulation.model");
 
 const Book = require("../../admin/book/book.model");
 
