@@ -84,4 +84,11 @@ router.get("/book-issued", isAdmin, issueController.getAllIssuedBooks);
 // COLLECT FINE
 router.patch("/collect-fine/:issueId", isAdmin, issueController.collectFine);
 
+// ADMIN UPDATE REQUEST STATUS
+router.patch(
+  "/update-request-status/:issueId",
+  isAdmin,
+  issueController.updateRequestStatus,
+);
+
 module.exports = router;

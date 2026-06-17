@@ -36,8 +36,6 @@ const updateBookValidationSchema = Joi.object({
   availableCopies: Joi.number().min(0),
 
   price: Joi.number().min(0),
-
-  libraryId: Joi.string(),
 });
 
 module.exports = {

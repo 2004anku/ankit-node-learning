@@ -561,6 +561,85 @@ const collectFine = async (req, res) => {
   }
 };
 
+// ==========================================
+// ADMIN UPDATE REQUEST STATUS
+// ==========================================
+const updateRequestStatus = async (req, res) => {
+  try {
+    const { issueId } = req.params;
+    const { status } = req.body;
+
+    const issue = await Issue.findById(issueId);
+
+    if (!issue) {
+      return res.status(404).json({
+        success: false,
+        message: "Request not found",
+      });
+    }
+
+    const oldStatus = issue.status;
+
+    // APPROVED -> REJECTED
+    if (oldStatus === "issued" && status === "rejected") {
+      const book = await Book.findById(issue.bookId);
+
+      if (book) {
+        book.availableCopies += 1;
+        await book.save();
+      }
+
+      issue.status = "rejected";
+      issue.issueDate = null;
+      issue.dueDate = null;
+
+      await issue.save();
+    }
+
+    // REJECTED -> APPROVED
+    else if (oldStatus === "rejected" && status === "issued") {
+      const book = await Book.findById(issue.bookId);
+
+      if (!book || book.availableCopies <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Book not available",
+        });
+      }
+
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + 90);
+
+      book.availableCopies -= 1;
+      await book.save();
+
+      issue.status = "issued";
+      issue.issueDate = new Date();
+      issue.dueDate = dueDate;
+      issue.issuedBy = req.user.id;
+
+      await issue.save();
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid status change",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Request updated successfully",
+      data: issue,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error while updating request",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   requestBook,
   getAllBookRequests,
@@ -572,4 +651,5 @@ module.exports = {
   getReturnRequests,
   acceptReturnRequest,
   collectFine,
+  updateRequestStatus,
 };

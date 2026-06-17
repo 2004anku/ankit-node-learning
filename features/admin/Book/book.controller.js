@@ -1,21 +1,30 @@
 const Book = require("./book.model");
 const bookValidationSchema = require("./book.validation");
+const Library = require("../library/library.model");
 
 // ADD BOOK
 const addBook = async (req, res) => {
   try {
-    const { bookName, author, category, isbn, totalCopies, libraryId, price } =
-      req.body;
+    const { bookName, author, category, isbn, totalCopies, price } = req.body;
 
-    // CREATE BOOK
+    // AUTO FETCH FIRST LIBRARY
+    const library = await Library.findOne();
+
+    if (!library) {
+      return res.status(404).json({
+        success: false,
+        message: "No library found",
+      });
+    }
+
     const newBook = await Book.create({
       bookName,
       author,
       category,
       isbn,
       totalCopies,
-      availableCopies: totalCopies, // AUTO SET
-      libraryId,
+      availableCopies: totalCopies,
+      libraryId: library._id,
       price,
     });
 
