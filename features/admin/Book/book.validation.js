@@ -15,8 +15,6 @@ const createBookValidationSchema = Joi.object({
   totalCopies: Joi.number().min(1).required(),
 
   price: Joi.number().min(0).required(),
-
-  libraryId: Joi.string().required(),
 });
 
 const updateBookValidationSchema = Joi.object({
@@ -36,6 +34,8 @@ const updateBookValidationSchema = Joi.object({
   availableCopies: Joi.number().min(0),
 
   price: Joi.number().min(0),
+  libraryId: Joi.string(),
+  isDeleted: Joi.boolean(),
 });
 
 module.exports = {

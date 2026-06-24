@@ -126,6 +126,14 @@ const approveRequest = async (req, res) => {
         message: "Book not available. Request rejected automatically.",
       });
     }
+    const student = await Student.findById(issue.studentId);
+
+    if (!student || student.status !== "active") {
+      return res.status(400).json({
+        success: false,
+        message: "Student is inactive",
+      });
+    }
 
     const alreadyIssued = await Issue.findOne({
       studentId: issue.studentId,
@@ -149,7 +157,6 @@ const approveRequest = async (req, res) => {
 
     dueDate.setDate(dueDate.getDate() + 90);
 
-    // UPDATE ISSUE
     // UPDATE ISSUE
     issue.status = "issued";
     issue.issueDate = new Date();
@@ -233,7 +240,13 @@ const assignBookToStudent = async (req, res) => {
         message: "Student not found",
       });
     }
-
+    // CHECK STUDENT ACTIVE OR NOT
+    if (student.status !== "active") {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot assign book to inactive student",
+      });
+    }
     // CHECK BOOK
     const book = await Book.findById(bookId);
 
@@ -639,7 +652,43 @@ const updateRequestStatus = async (req, res) => {
     });
   }
 };
+// ==========================================
+// DELETE REJECTED REQUEST
+// ==========================================
+const deleteRejectedRequest = async (req, res) => {
+  try {
+    const { issueId } = req.params;
 
+    const issue = await Issue.findById(issueId);
+
+    if (!issue) {
+      return res.status(404).json({
+        success: false,
+        message: "Request not found",
+      });
+    }
+
+    if (issue.status !== "rejected") {
+      return res.status(400).json({
+        success: false,
+        message: "Only rejected requests can be deleted",
+      });
+    }
+
+    await Issue.findByIdAndDelete(issueId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Rejected request deleted successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error deleting request",
+      error: error.message,
+    });
+  }
+};
 module.exports = {
   requestBook,
   getAllBookRequests,
@@ -652,4 +701,5 @@ module.exports = {
   acceptReturnRequest,
   collectFine,
   updateRequestStatus,
+  deleteRejectedRequest,
 };

@@ -34,5 +34,15 @@ router.patch(
 
 // DELETE STUDENT
 router.delete("/remove-student/:id", isAdmin, studentController.deleteStudent);
+// get profile
+router.get("/profile/:id", isAdmin, studentController.getStudentProfile);
+// restore student
+router.patch("/restore-student/:id", isAdmin, studentController.restoreStudent);
+
+router.get(
+  "/archived-students",
+  isAdmin,
+  studentController.getArchivedStudents,
+);
 
 module.exports = router;

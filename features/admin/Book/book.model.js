@@ -56,6 +56,11 @@ const bookSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

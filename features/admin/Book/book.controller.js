@@ -45,8 +45,9 @@ const addBook = async (req, res) => {
 // GET ALL BOOKS
 const getAllBooks = async (req, res) => {
   try {
-    const books = await Book.find().populate("libraryId");
-
+    const books = await Book.find({
+      isDeleted: false,
+    }).populate("libraryId");
     res.status(200).json({
       success: true,
       message: "All books fetched successfully",
@@ -71,6 +72,18 @@ const updateBook = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Please provide data to update",
+      });
+    }
+
+    const existingBook = await Book.findOne({
+      _id: bookId,
+      isDeleted: false,
+    });
+
+    if (!existingBook) {
+      return res.status(404).json({
+        success: false,
+        message: "Book not found",
       });
     }
 
@@ -103,7 +116,15 @@ const updateBook = async (req, res) => {
 // DELETE BOOK
 const deleteBook = async (req, res) => {
   try {
-    const deletedBook = await Book.findByIdAndDelete(req.params.id);
+    const deletedBook = await Book.findByIdAndUpdate(
+      req.params.id,
+      {
+        isDeleted: true,
+      },
+      {
+        new: true,
+      },
+    );
 
     if (!deletedBook) {
       return res.status(404).json({
@@ -114,7 +135,7 @@ const deleteBook = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Book deleted successfully",
+      message: "Book archived successfully",
       data: deletedBook,
     });
   } catch (error) {
@@ -125,10 +146,48 @@ const deleteBook = async (req, res) => {
     });
   }
 };
+const getArchivedBooks = async (req, res) => {
+  const books = await Book.find({ isDeleted: true });
 
+  res.status(200).json({
+    success: true,
+    data: books,
+  });
+};
+
+const restoreBook = async (req, res) => {
+  try {
+    const book = await Book.findByIdAndUpdate(
+      req.params.id,
+      { isDeleted: false },
+      { new: true },
+    );
+
+    if (!book) {
+      return res.status(404).json({
+        success: false,
+        message: "Book not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Book restored successfully",
+      data: book,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error restoring book",
+      error: error.message,
+    });
+  }
+};
 module.exports = {
   addBook,
   getAllBooks,
   updateBook,
   deleteBook,
+  getArchivedBooks,
+  restoreBook,
 };

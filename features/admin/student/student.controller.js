@@ -1,5 +1,6 @@
 const Student = require("./student.model");
 const bcrypt = require("bcrypt");
+const Issue = require("../book-circulation/book.circulation.model");
 
 // ================= CREATE STUDENT =================
 
@@ -60,7 +61,9 @@ const createStudent = async (req, res) => {
 
 const getAllStudents = async (req, res) => {
   try {
-    const students = await Student.find().select("-password");
+    const students = await Student.find({ isDeleted: false }).select(
+      "-password",
+    );
 
     return res.status(200).json({
       success: true,
@@ -119,7 +122,6 @@ const updateStudent = async (req, res) => {
       });
     }
 
-    // HASH PASSWORD IF PASSWORD IS UPDATED
     if (req.body.password) {
       req.body.password = await bcrypt.hash(req.body.password, 10);
     }
@@ -156,8 +158,11 @@ const deleteStudent = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const deletedStudent =
-      await Student.findByIdAndDelete(id).select("-password");
+    const deletedStudent = await Student.findByIdAndUpdate(
+      id,
+      { isDeleted: true },
+      { new: true },
+    );
 
     if (!deletedStudent) {
       return res.status(404).json({
@@ -168,13 +173,106 @@ const deleteStudent = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Student deleted successfully",
+      message: "Student archived successfully",
       data: deletedStudent,
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
       message: "Error while deleting student",
+      error: error.message,
+    });
+  }
+};
+// ================= STUDENT PROFILE =================
+
+const getStudentProfile = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const student = await Student.findById(id).select("-password");
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: "Student not found",
+      });
+    }
+
+    const issuedBooks = await Issue.find({
+      studentId: id,
+      status: "issued",
+    }).populate("bookId");
+
+    const returnedBooks = await Issue.find({
+      studentId: id,
+      status: "returned",
+    }).populate("bookId");
+
+    const pendingBooks = await Issue.find({
+      studentId: id,
+      status: {
+        $in: ["pending", "return-pending"],
+      },
+    }).populate("bookId");
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        student,
+        issuedBooks,
+        returnedBooks,
+        pendingBooks,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching profile",
+      error: error.message,
+    });
+  }
+};
+
+const restoreStudent = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const student = await Student.findByIdAndUpdate(
+      id,
+      { isDeleted: false },
+      { new: true },
+    ).select("-password");
+
+    return res.status(200).json({
+      success: true,
+      message: "Student restored successfully",
+      data: student,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error restoring student",
+      error: error.message,
+    });
+  }
+};
+// ================= GET ARCHIVED STUDENTS =================
+const getArchivedStudents = async (req, res) => {
+  try {
+    const students = await Student.find({ isDeleted: true }).select(
+      "-password",
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Archived students fetched successfully",
+      data: students,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching archived students",
       error: error.message,
     });
   }
@@ -186,4 +284,7 @@ module.exports = {
   getSingleStudent,
   updateStudent,
   deleteStudent,
+  getStudentProfile,
+  restoreStudent,
+  getArchivedStudents,
 };

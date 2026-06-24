@@ -33,4 +33,9 @@ router.patch(
 // DELETE BOOK
 router.delete("/remove-book/:id", isAdmin, bookController.deleteBook);
 
+// ACHIVED BOOKS
+router.get("/archived-books", isAdmin, bookController.getArchivedBooks);
+
+// RESTORE
+router.patch("/restore-book/:id", isAdmin, bookController.restoreBook);
 module.exports = router;

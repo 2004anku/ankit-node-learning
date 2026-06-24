@@ -2,7 +2,6 @@ const cors = require("cors");
 const express = require("express");
 
 const connectDB = require("./config/db");
-
 const libraryRoutes = require("./features/admin/library/library.routes");
 const userRoutes = require("./features/admin/useraccount/user.routes");
 const bookRoutes = require("./features/admin/book/book.routes");
@@ -15,6 +14,7 @@ const app = express();
 require("dotenv").config();
 
 // DATABASE CONNECTION
+console.log("MONGO_URI =", process.env.MONGO_URI);
 connectDB();
 
 // MIDDLEWARE

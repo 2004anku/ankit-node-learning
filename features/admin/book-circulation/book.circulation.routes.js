@@ -91,4 +91,10 @@ router.patch(
   issueController.updateRequestStatus,
 );
 
+router.delete(
+  "/delete-request/:issueId",
+  isAdmin,
+  issueController.deleteRejectedRequest,
+);
+
 module.exports = router;

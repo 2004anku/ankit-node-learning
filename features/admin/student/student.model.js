@@ -43,6 +43,10 @@ const studentSchema = new mongoose.Schema(
       enum: ["active", "inactive"],
       default: "active",
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
