@@ -18,7 +18,6 @@ console.log("MONGO_URI =", process.env.MONGO_URI);
 connectDB();
 
 // MIDDLEWARE
-// MIDDLEWARE
 app.use(
   cors({
     origin: "http://localhost:3000", // frontend url
