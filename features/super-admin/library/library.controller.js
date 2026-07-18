@@ -1,30 +1,74 @@
 const Library = require("./library.model");
-const libraryValidationSchema = require("./library.validation");
+const College = require("../college/college.model");
 
+// ==========================================
 // CREATE LIBRARY
+// ==========================================
+
 const registerLibrary = async (req, res) => {
   try {
-    const { libraryName, ownerName, address, city, state, phone, email } =
-      req.body;
+    const {
+      collegeId,
+      libraryHead,
+      ownerName,
+      email,
+      phone,
+      address,
+      workingHours,
+      status,
+      plan,
+    } = req.body;
+
+    // CHECK COLLEGE EXISTS
+    const college = await College.findById(collegeId);
+
+    if (!college) {
+      return res.status(404).json({
+        success: false,
+        message: "College not found",
+      });
+    }
+
+    // CHECK DUPLICATE EMAIL
+    const existingEmail = await Library.findOne({ email });
+
+    if (existingEmail) {
+      return res.status(400).json({
+        success: false,
+        message: "Library email already exists",
+      });
+    }
+
+    // CHECK DUPLICATE PHONE
+    const existingPhone = await Library.findOne({ phone });
+
+    if (existingPhone) {
+      return res.status(400).json({
+        success: false,
+        message: "Library phone already exists",
+      });
+    }
 
     // CREATE LIBRARY
     const newLibrary = await Library.create({
+      collegeId,
       libraryName,
       ownerName,
-      address,
-      city,
-      state,
-      phone,
       email,
+      phone,
+      address,
+      workingHours,
+      status,
+      plan,
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: "Library registered successfully",
       data: newLibrary,
     });
   } catch (err) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Error registering library",
       error: err.message,
@@ -32,19 +76,24 @@ const registerLibrary = async (req, res) => {
   }
 };
 
+// ==========================================
 // GET ALL LIBRARIES
+// ==========================================
+
 const getLibraries = async (req, res) => {
   try {
-    const libraries = await Library.find();
+    const libraries = await Library.find()
+      .populate("collegeId", "collegeName collegeCode")
+      .sort({ createdAt: -1 });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Libraries fetched successfully",
       totalLibraries: libraries.length,
       data: libraries,
     });
   } catch (err) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Error fetching libraries",
       error: err.message,
@@ -52,10 +101,12 @@ const getLibraries = async (req, res) => {
   }
 };
 
+// ==========================================
 // UPDATE LIBRARY
+// ==========================================
+
 const updateLibrary = async (req, res) => {
   try {
-    // CHECK EMPTY BODY
     if (Object.keys(req.body).length === 0) {
       return res.status(400).json({
         success: false,
@@ -72,7 +123,6 @@ const updateLibrary = async (req, res) => {
       },
     );
 
-    // CHECK LIBRARY EXISTS
     if (!updatedLibrary) {
       return res.status(404).json({
         success: false,
@@ -80,13 +130,13 @@ const updateLibrary = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Library updated successfully",
       data: updatedLibrary,
     });
   } catch (err) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Error updating library",
       error: err.message,
@@ -94,12 +144,14 @@ const updateLibrary = async (req, res) => {
   }
 };
 
+// ==========================================
 // DELETE LIBRARY
+// ==========================================
+
 const deleteLibrary = async (req, res) => {
   try {
     const deletedLibrary = await Library.findByIdAndDelete(req.params.id);
 
-    // CHECK LIBRARY EXISTS
     if (!deletedLibrary) {
       return res.status(404).json({
         success: false,
@@ -107,13 +159,13 @@ const deleteLibrary = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Library deleted successfully",
       data: deletedLibrary,
     });
   } catch (err) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Error deleting library",
       error: err.message,

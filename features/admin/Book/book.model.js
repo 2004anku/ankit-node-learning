@@ -61,6 +61,11 @@ const bookSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    collegeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "College",
+      required: true,
+    },
   },
   {
     timestamps: true,

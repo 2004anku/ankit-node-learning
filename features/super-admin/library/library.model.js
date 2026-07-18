@@ -3,13 +3,12 @@ const mongoose = require("mongoose");
 const addressSchema = require("../../../shared/schema/address.schema");
 const librarySchema = new mongoose.Schema(
   {
-    libraryName: {
-      type: String,
+    collegeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "College",
       required: true,
-      trim: true,
     },
-
-    ownerName: {
+    libraryHead: {
       type: String,
       required: true,
       trim: true,

@@ -47,6 +47,17 @@ const studentSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    collegeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "College",
+      required: true,
+    },
+
+    libraryId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Library",
+      required: true,
+    },
   },
   {
     timestamps: true,

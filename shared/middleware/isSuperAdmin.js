@@ -1,14 +1,18 @@
 const jwt = require("jsonwebtoken");
 
-const isAdmin = (req, res, next) => {
+// ==========================================
+// SUPER ADMIN AUTHORIZATION MIDDLEWARE
+// ==========================================
+
+const isSuperAdmin = (req, res, next) => {
   try {
-    // GET TOKEN FROM AUTH HEADER
+    // GET AUTHORIZATION HEADER
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({
         success: false,
-        message: "No token provided",
+        message: "Authorization token is required",
       });
     }
 
@@ -18,30 +22,28 @@ const isAdmin = (req, res, next) => {
     // VERIFY TOKEN
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // ALLOW ONLY LIBRARY ADMIN
-    if (decoded.role !== "library-admin") {
+    // VERIFY USER TYPE
+    if (decoded.type !== "super-admin") {
       return res.status(403).json({
         success: false,
-        message: "Library Admin access only",
+        message: "Access denied. Super Admin only.",
       });
     }
 
-    // ATTACH USER DATA
+    // ATTACH USER DETAILS
     req.user = {
       id: decoded.id,
-      role: decoded.role,
-      collegeId: decoded.collegeId,
-      libraryId: decoded.libraryId,
+      type: decoded.type,
     };
 
     next();
   } catch (error) {
     return res.status(401).json({
       success: false,
-      message: "Invalid token",
+      message: "Invalid or expired token",
       error: error.message,
     });
   }
 };
 
-module.exports = isAdmin;
+module.exports = isSuperAdmin;

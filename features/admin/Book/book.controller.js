@@ -1,6 +1,6 @@
 const Book = require("./book.model");
 const bookValidationSchema = require("./book.validation");
-const Library = require("../library/library.model");
+const Library = require("../../super-admin/library/library.model");
 
 // ADD BOOK
 const addBook = async (req, res) => {

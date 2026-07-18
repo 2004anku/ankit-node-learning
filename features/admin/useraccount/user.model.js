@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["admin"],
+      enum: ["super-admin", "library-admin", "student"],
       required: true,
     },
 
@@ -56,6 +56,17 @@ const userSchema = new mongoose.Schema(
 
     lastLogin: {
       type: Date,
+    },
+    collegeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "College",
+      default: null,
+    },
+
+    libraryId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Library",
+      default: null,
     },
   },
   {

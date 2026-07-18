@@ -2,7 +2,8 @@ const Joi = require("joi");
 const addressValidationSchema = require("../../../shared/schema/address.validation");
 
 const createLibraryValidationSchema = Joi.object({
-  libraryName: Joi.string().trim().required(),
+  collegeId: Joi.string().required(),
+  libraryHead: Joi.string().trim().required(),
 
   ownerName: Joi.string().trim().required(),
 
@@ -34,7 +35,8 @@ const createLibraryValidationSchema = Joi.object({
 });
 
 const updateLibraryValidationSchema = Joi.object({
-  libraryName: Joi.string().trim(),
+  collegeId: Joi.string(),
+  libraryHead: Joi.string().trim(),
 
   ownerName: Joi.string().trim(),
 
