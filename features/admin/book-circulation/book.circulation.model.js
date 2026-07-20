@@ -74,6 +74,16 @@ const issueSchema = new mongoose.Schema(
       default: null,
       trim: true,
     },
+    libraryId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Library",
+      required: true,
+    },
+    collegeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "College",
+      required: true,
+    },
   },
   {
     timestamps: true,

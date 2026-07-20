@@ -4,8 +4,7 @@ const addressValidationSchema = require("../../../shared/schema/address.validati
 const createLibraryValidationSchema = Joi.object({
   collegeId: Joi.string().required(),
   libraryHead: Joi.string().trim().required(),
-
-  ownerName: Joi.string().trim().required(),
+  libraryName: Joi.string().trim().required(),
 
   email: Joi.string().email().trim().lowercase().required(),
 
@@ -38,7 +37,7 @@ const updateLibraryValidationSchema = Joi.object({
   collegeId: Joi.string(),
   libraryHead: Joi.string().trim(),
 
-  ownerName: Joi.string().trim(),
+  libraryName: Joi.string().trim(),
 
   email: Joi.string().email().trim().lowercase(),
 

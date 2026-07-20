@@ -38,13 +38,6 @@ const bookSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
-    // Currently libraryId is assigned manually using the Library ID fetched from Get Libraries API
-    libraryId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Library",
-      required: true,
-    },
-
     status: {
       type: String,
       enum: ["available", "unavailable"],
@@ -64,6 +57,11 @@ const bookSchema = new mongoose.Schema(
     collegeId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "College",
+      required: true,
+    },
+    libraryId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Library",
       required: true,
     },
   },

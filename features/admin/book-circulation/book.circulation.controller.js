@@ -14,8 +14,11 @@ const requestBook = async (req, res) => {
     const studentId = req.user.id;
 
     // CHECK BOOK
-    const book = await Book.findById(bookId);
-
+    const book = await Book.findOne({
+      _id: bookId,
+      collegeId: req.user.collegeId,
+      libraryId: req.user.libraryId,
+    });
     if (!book) {
       return res.status(404).json({
         success: false,
@@ -44,6 +47,9 @@ const requestBook = async (req, res) => {
       studentId,
       bookId,
       status: "pending",
+
+      collegeId: req.user.collegeId,
+      libraryId: req.user.libraryId,
     });
 
     return res.status(201).json({
@@ -66,15 +72,32 @@ const requestBook = async (req, res) => {
 const getAllBookRequests = async (req, res) => {
   try {
     const requests = await Issue.find()
-      .populate("studentId", "studentName")
-      .populate("bookId")
-      .populate("issuedBy", "studentName")
-      .populate("returnedTo", "studentName");
+      .populate({
+        path: "studentId",
+        match: {
+          collegeId: req.user.collegeId,
+          libraryId: req.user.libraryId,
+        },
+        select: "studentName",
+      })
+      .populate({
+        path: "bookId",
+        match: {
+          collegeId: req.user.collegeId,
+          libraryId: req.user.libraryId,
+        },
+      })
+      .populate("issuedBy", "fullName")
+      .populate("returnedTo", "fullName");
+
+    const filteredRequests = requests.filter(
+      (request) => request.studentId && request.bookId,
+    );
 
     return res.status(200).json({
       success: true,
-      total: requests.length,
-      data: requests,
+      total: filteredRequests.length,
+      data: filteredRequests,
     });
   } catch (error) {
     return res.status(500).json({
@@ -93,6 +116,27 @@ const approveRequest = async (req, res) => {
     const { issueId } = req.params;
 
     const issue = await Issue.findById(issueId);
+
+    if (!issue) {
+      return res.status(404).json({
+        success: false,
+        message: "Request not found",
+      });
+    }
+
+    // SECURITY CHECK
+    const student = await Student.findOne({
+      _id: issue.studentId,
+      collegeId: req.user.collegeId,
+      libraryId: req.user.libraryId,
+    });
+
+    if (!student) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to access this request",
+      });
+    }
 
     if (!issue) {
       return res.status(404).json({
@@ -127,9 +171,7 @@ const approveRequest = async (req, res) => {
         message: "Book not available. Request rejected automatically.",
       });
     }
-    const student = await Student.findById(issue.studentId);
-
-    if (!student || student.status !== "active") {
+    if (student.status !== "active") {
       return res.status(400).json({
         success: false,
         message: "Student is inactive",
@@ -200,6 +242,26 @@ const rejectRequest = async (req, res) => {
       });
     }
 
+    const student = await Student.findOne({
+      _id: issue.studentId,
+      collegeId: req.user.collegeId,
+      libraryId: req.user.libraryId,
+    });
+
+    if (!student) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized request",
+      });
+    }
+
+    if (!issue) {
+      return res.status(404).json({
+        success: false,
+        message: "Request not found",
+      });
+    }
+
     if (issue.status !== "pending") {
       return res.status(400).json({
         success: false,
@@ -232,8 +294,11 @@ const assignBookToStudent = async (req, res) => {
     const { studentId, bookId, dueDate } = req.body;
 
     // CHECK STUDENT
-    const student = await Student.findById(studentId);
-
+    const student = await Student.findOne({
+      _id: studentId,
+      collegeId: req.user.collegeId,
+      libraryId: req.user.libraryId,
+    });
     if (!student) {
       return res.status(404).json({
         success: false,
@@ -248,8 +313,11 @@ const assignBookToStudent = async (req, res) => {
       });
     }
     // CHECK BOOK
-    const book = await Book.findById(bookId);
-
+    const book = await Book.findOne({
+      _id: bookId,
+      collegeId: req.user.collegeId,
+      libraryId: req.user.libraryId,
+    });
     if (!book) {
       return res.status(404).json({
         success: false,
@@ -308,6 +376,9 @@ const assignBookToStudent = async (req, res) => {
       dueDate: finalDueDate,
       status: "issued",
       issuedBy: req.user.id,
+
+      collegeId: req.user.collegeId,
+      libraryId: req.user.libraryId,
     });
 
     // REDUCE AVAILABLE COPIES
@@ -336,16 +407,33 @@ const getAllIssuedBooks = async (req, res) => {
     const issues = await Issue.find({
       status: "issued",
     })
-      .populate("studentId", "fullName")
-      .populate("bookId")
+      .populate({
+        path: "studentId",
+        match: {
+          collegeId: req.user.collegeId,
+          libraryId: req.user.libraryId,
+        },
+        select: "studentName",
+      })
+      .populate({
+        path: "bookId",
+        match: {
+          collegeId: req.user.collegeId,
+          libraryId: req.user.libraryId,
+        },
+      })
       .populate("issuedBy", "fullName")
       .populate("returnedTo", "fullName");
+
+    const filteredIssues = issues.filter(
+      (issue) => issue.studentId && issue.bookId,
+    );
 
     res.status(200).json({
       success: true,
       message: "Issued books fetched successfully",
-      total: issues.length,
-      data: issues,
+      total: filteredIssues.length,
+      data: filteredIssues,
     });
   } catch (error) {
     res.status(500).json({
@@ -416,15 +504,33 @@ const getReturnRequests = async (req, res) => {
     const requests = await Issue.find({
       status: "return-pending",
     })
-      .populate("studentId", "fullName")
-      .populate("bookId")
+      .populate({
+        path: "studentId",
+        match: {
+          collegeId: req.user.collegeId,
+          libraryId: req.user.libraryId,
+        },
+        select: "studentName",
+      })
+      .populate({
+        path: "bookId",
+        match: {
+          collegeId: req.user.collegeId,
+          libraryId: req.user.libraryId,
+        },
+      })
       .populate("issuedBy", "fullName")
       .populate("returnedTo", "fullName");
 
+    const filteredRequests = requests.filter(
+      (request) => request.studentId && request.bookId,
+    );
+
     return res.status(200).json({
       success: true,
-      total: requests.length,
-      data: requests,
+      message: "Return requests fetched successfully",
+      total: filteredRequests.length,
+      data: filteredRequests,
     });
   } catch (error) {
     return res.status(500).json({
@@ -434,7 +540,6 @@ const getReturnRequests = async (req, res) => {
     });
   }
 };
-
 // ==========================================
 // ADMIN ACCEPT RETURN REQUEST
 // ==========================================
@@ -443,6 +548,18 @@ const acceptReturnRequest = async (req, res) => {
     const { issueId } = req.params;
 
     const issue = await Issue.findById(issueId);
+    const student = await Student.findOne({
+      _id: issue.studentId,
+      collegeId: req.user.collegeId,
+      libraryId: req.user.libraryId,
+    });
+
+    if (!student) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized request",
+      });
+    }
 
     if (!issue) {
       return res.status(404).json({
@@ -479,13 +596,9 @@ const acceptReturnRequest = async (req, res) => {
 
     await issue.save();
     // UPDATE STUDENT FINE
-    const student = await Student.findById(issue.studentId);
+    student.fine = (student.fine || 0) + fine;
 
-    if (student) {
-      student.fine = (student.fine || 0) + fine;
-
-      await student.save();
-    }
+    await student.save();
 
     // INCREASE BOOK COPIES
     book.availableCopies += 1;
@@ -523,6 +636,18 @@ const collectFine = async (req, res) => {
     }
 
     const issue = await Issue.findById(issueId);
+    const student = await Student.findOne({
+      _id: issue.studentId,
+      collegeId: req.user.collegeId,
+      libraryId: req.user.libraryId,
+    });
+
+    if (!student) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized request",
+      });
+    }
 
     if (!issue) {
       return res.status(404).json({
@@ -549,13 +674,9 @@ const collectFine = async (req, res) => {
 
     await issue.save();
 
-    const student = await Student.findById(issue.studentId);
+    student.fine = Math.max((student.fine || 0) - issue.fine, 0);
 
-    if (student) {
-      student.fine = Math.max((student.fine || 0) - issue.fine, 0);
-
-      await student.save();
-    }
+    await student.save();
 
     res.status(200).json({
       success: true,
@@ -583,6 +704,18 @@ const updateRequestStatus = async (req, res) => {
     const { status } = req.body;
 
     const issue = await Issue.findById(issueId);
+    const student = await Student.findOne({
+      _id: issue.studentId,
+      collegeId: req.user.collegeId,
+      libraryId: req.user.libraryId,
+    });
+
+    if (!student) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized request",
+      });
+    }
 
     if (!issue) {
       return res.status(404).json({
@@ -660,6 +793,18 @@ const deleteRejectedRequest = async (req, res) => {
     const { issueId } = req.params;
 
     const issue = await Issue.findById(issueId);
+    const student = await Student.findOne({
+      _id: issue.studentId,
+      collegeId: req.user.collegeId,
+      libraryId: req.user.libraryId,
+    });
+
+    if (!student) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized request",
+      });
+    }
 
     if (!issue) {
       return res.status(404).json({

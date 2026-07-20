@@ -8,6 +8,12 @@ const librarySchema = new mongoose.Schema(
       ref: "College",
       required: true,
     },
+
+    libraryName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     libraryHead: {
       type: String,
       required: true,

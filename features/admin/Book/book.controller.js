@@ -7,16 +7,6 @@ const addBook = async (req, res) => {
   try {
     const { bookName, author, category, isbn, totalCopies, price } = req.body;
 
-    // AUTO FETCH FIRST LIBRARY
-    const library = await Library.findOne();
-
-    if (!library) {
-      return res.status(404).json({
-        success: false,
-        message: "No library found",
-      });
-    }
-
     const newBook = await Book.create({
       bookName,
       author,
@@ -24,8 +14,10 @@ const addBook = async (req, res) => {
       isbn,
       totalCopies,
       availableCopies: totalCopies,
-      libraryId: library._id,
       price,
+
+      collegeId: req.user.collegeId,
+      libraryId: req.user.libraryId,
     });
 
     return res.status(201).json({
@@ -41,11 +33,11 @@ const addBook = async (req, res) => {
     });
   }
 };
-
 // GET ALL BOOKS
 const getAllBooks = async (req, res) => {
   try {
     const books = await Book.find({
+      libraryId: req.user.libraryId,
       isDeleted: false,
     }).populate("libraryId");
     res.status(200).json({
@@ -62,7 +54,10 @@ const getAllBooks = async (req, res) => {
   }
 };
 
+// ==========================================
 // UPDATE BOOK
+// ==========================================
+
 const updateBook = async (req, res) => {
   try {
     const bookId = req.params.id;
@@ -75,8 +70,11 @@ const updateBook = async (req, res) => {
       });
     }
 
+    // CHECK BOOK BELONGS TO CURRENT LIBRARY
     const existingBook = await Book.findOne({
       _id: bookId,
+      libraryId: req.user.libraryId,
+      collegeId: req.user.collegeId,
       isDeleted: false,
     });
 
@@ -87,25 +85,27 @@ const updateBook = async (req, res) => {
       });
     }
 
-    const updatedBook = await Book.findByIdAndUpdate(bookId, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    // UPDATE BOOK
+    const updatedBook = await Book.findOneAndUpdate(
+      {
+        _id: bookId,
+        libraryId: req.user.libraryId,
+        collegeId: req.user.collegeId,
+      },
+      req.body,
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
 
-    if (!updatedBook) {
-      return res.status(404).json({
-        success: false,
-        message: "Book not found",
-      });
-    }
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Book updated successfully",
       data: updatedBook,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Error while updating book",
       error: error.message,
@@ -113,11 +113,19 @@ const updateBook = async (req, res) => {
   }
 };
 
-// DELETE BOOK
+// ==========================================
+// DELETE (ARCHIVE) BOOK
+// ==========================================
+
 const deleteBook = async (req, res) => {
   try {
-    const deletedBook = await Book.findByIdAndUpdate(
-      req.params.id,
+    const deletedBook = await Book.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        libraryId: req.user.libraryId,
+        collegeId: req.user.collegeId,
+        isDeleted: false,
+      },
       {
         isDeleted: true,
       },
@@ -133,34 +141,63 @@ const deleteBook = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Book archived successfully",
       data: deletedBook,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Error while deleting book",
       error: error.message,
     });
   }
-};
-const getArchivedBooks = async (req, res) => {
-  const books = await Book.find({ isDeleted: true });
+}; // ==========================================
+// GET ARCHIVED BOOKS
+// ==========================================
 
-  res.status(200).json({
-    success: true,
-    data: books,
-  });
+const getArchivedBooks = async (req, res) => {
+  try {
+    const books = await Book.find({
+      libraryId: req.user.libraryId,
+      collegeId: req.user.collegeId,
+      isDeleted: true,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Archived books fetched successfully",
+      data: books,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error fetching archived books",
+      error: error.message,
+    });
+  }
 };
+
+// ==========================================
+// RESTORE BOOK
+// ==========================================
 
 const restoreBook = async (req, res) => {
   try {
-    const book = await Book.findByIdAndUpdate(
-      req.params.id,
-      { isDeleted: false },
-      { new: true },
+    const book = await Book.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        libraryId: req.user.libraryId,
+        collegeId: req.user.collegeId,
+        isDeleted: true,
+      },
+      {
+        isDeleted: false,
+      },
+      {
+        new: true,
+      },
     );
 
     if (!book) {

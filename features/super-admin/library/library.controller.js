@@ -9,8 +9,8 @@ const registerLibrary = async (req, res) => {
   try {
     const {
       collegeId,
+      libraryName,
       libraryHead,
-      ownerName,
       email,
       phone,
       address,
@@ -52,8 +52,8 @@ const registerLibrary = async (req, res) => {
     // CREATE LIBRARY
     const newLibrary = await Library.create({
       collegeId,
+      libraryHead,
       libraryName,
-      ownerName,
       email,
       phone,
       address,
