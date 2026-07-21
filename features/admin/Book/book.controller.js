@@ -1,12 +1,12 @@
 const Book = require("./book.model");
 const bookValidationSchema = require("./book.validation");
-const Library = require("../../super-admin/library/library.model");
+const Library = require("../../college-admin/library/library.model");
 
 // ADD BOOK
 const addBook = async (req, res) => {
   try {
     const { bookName, author, category, isbn, totalCopies, price } = req.body;
-
+    console.log(req.user);
     const newBook = await Book.create({
       bookName,
       author,
@@ -15,7 +15,7 @@ const addBook = async (req, res) => {
       totalCopies,
       availableCopies: totalCopies,
       price,
-
+      // Automatically assign from logged-in admin
       collegeId: req.user.collegeId,
       libraryId: req.user.libraryId,
     });
@@ -37,6 +37,7 @@ const addBook = async (req, res) => {
 const getAllBooks = async (req, res) => {
   try {
     const books = await Book.find({
+      collegeId: req.user.collegeId,
       libraryId: req.user.libraryId,
       isDeleted: false,
     }).populate("libraryId");

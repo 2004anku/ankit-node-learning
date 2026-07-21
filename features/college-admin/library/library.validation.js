@@ -3,7 +3,6 @@ const addressValidationSchema = require("../../../shared/schema/address.validati
 
 const createLibraryValidationSchema = Joi.object({
   collegeId: Joi.string().required(),
-  libraryHead: Joi.string().trim().required(),
   libraryName: Joi.string().trim().required(),
 
   email: Joi.string().email().trim().lowercase().required(),
@@ -17,8 +16,6 @@ const createLibraryValidationSchema = Joi.object({
 
       "string.empty": "Phone number is required",
     }),
-
-  address: addressValidationSchema.required(),
 
   workingHours: Joi.object({
     open: Joi.string().trim(),
@@ -35,7 +32,6 @@ const createLibraryValidationSchema = Joi.object({
 
 const updateLibraryValidationSchema = Joi.object({
   collegeId: Joi.string(),
-  libraryHead: Joi.string().trim(),
 
   libraryName: Joi.string().trim(),
 
@@ -47,8 +43,6 @@ const updateLibraryValidationSchema = Joi.object({
       "string.pattern.base":
         "Phone number must be in format like +919876543210",
     }),
-
-  address: addressValidationSchema,
 
   workingHours: Joi.object({
     open: Joi.string().trim(),

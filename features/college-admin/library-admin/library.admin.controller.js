@@ -1,5 +1,5 @@
 const User = require("../../admin/useraccount/user.model");
-const Library = require("../library/library.model");
+const Library = require("../../college-admin/library/library.model");
 
 const bcrypt = require("bcrypt");
 

@@ -14,11 +14,6 @@ const librarySchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    libraryHead: {
-      type: String,
-      required: true,
-      trim: true,
-    },
 
     email: {
       type: String,
@@ -33,8 +28,6 @@ const librarySchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-
-    address: addressSchema,
 
     workingHours: {
       open: String,

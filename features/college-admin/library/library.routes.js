@@ -4,7 +4,7 @@ const router = express.Router();
 
 const libraryController = require("./library.controller");
 
-const isSuperAdmin = require("../../../shared/middleware/isSuperAdmin");
+const isCollegeAdmin = require("../../../shared/middleware/isCollegeAdmin");
 
 const validate = require("../../../shared/middleware/form.validation");
 
@@ -19,7 +19,7 @@ const {
 
 router.post(
   "/create-library",
-  isSuperAdmin,
+  isCollegeAdmin,
   validate(createLibraryValidationSchema),
   libraryController.registerLibrary,
 );
@@ -28,7 +28,7 @@ router.post(
 // GET ALL LIBRARIES
 // ==========================================
 
-router.get("/all-libraries", isSuperAdmin, libraryController.getLibraries);
+router.get("/all-libraries", isCollegeAdmin, libraryController.getLibraries);
 
 // ==========================================
 // UPDATE LIBRARY
@@ -36,7 +36,7 @@ router.get("/all-libraries", isSuperAdmin, libraryController.getLibraries);
 
 router.patch(
   "/update-library/:id",
-  isSuperAdmin,
+  isCollegeAdmin,
   validate(updateLibraryValidationSchema),
   libraryController.updateLibrary,
 );
@@ -47,7 +47,7 @@ router.patch(
 
 router.delete(
   "/remove-library/:id",
-  isSuperAdmin,
+  isCollegeAdmin,
   libraryController.deleteLibrary,
 );
 

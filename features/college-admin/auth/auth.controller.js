@@ -1,12 +1,20 @@
-const User = require("../useraccount/user.model");
+const User = require("../../admin/useraccount/user.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+
+// ==========================================
+// COLLEGE ADMIN LOGIN
+// ==========================================
+
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     // FIND USER
-    const user = await User.findOne({ email });
+    const user = await User.findOne({
+      email,
+      role: "college-admin",
+    });
 
     if (!user) {
       return res.status(401).json({
@@ -15,7 +23,15 @@ const login = async (req, res) => {
       });
     }
 
-    // CHECK PASSWORD
+    // CHECK ACCOUNT STATUS
+    if (!user.isActive) {
+      return res.status(403).json({
+        success: false,
+        message: "Account is inactive",
+      });
+    }
+
+    // VERIFY PASSWORD
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -25,13 +41,17 @@ const login = async (req, res) => {
       });
     }
 
-    // GENERATE TOKEN
+    // UPDATE LAST LOGIN
+    user.lastLogin = new Date();
+
+    await user.save();
+
+    // CREATE JWT
     const token = jwt.sign(
       {
         id: user._id,
         role: user.role,
         collegeId: user.collegeId,
-        libraryId: user.libraryId,
       },
       process.env.JWT_SECRET,
       {
@@ -39,30 +59,27 @@ const login = async (req, res) => {
       },
     );
 
-    // SAFE RESPONSE
-    const safeUser = {
-      id: user._id,
-      fullName: user.fullName,
-      email: user.email,
-      role: user.role,
-      collegeId: user.collegeId,
-      libraryId: user.libraryId,
-    };
-
     return res.status(200).json({
       success: true,
       message: "Login successful",
       token,
-      data: safeUser,
+      data: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+        collegeId: user.collegeId,
+      },
     });
-  } catch (err) {
+  } catch (error) {
     return res.status(500).json({
       success: false,
       message: "Error while login",
-      error: err.message,
+      error: error.message,
     });
   }
 };
+
 module.exports = {
   login,
 };

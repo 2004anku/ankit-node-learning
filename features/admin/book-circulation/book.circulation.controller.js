@@ -115,7 +115,12 @@ const approveRequest = async (req, res) => {
   try {
     const { issueId } = req.params;
 
-    const issue = await Issue.findById(issueId);
+    // CHECK ISSUE BELONGS TO THIS LIBRARY
+    const issue = await Issue.findOne({
+      _id: issueId,
+      collegeId: req.user.collegeId,
+      libraryId: req.user.libraryId,
+    });
 
     if (!issue) {
       return res.status(404).json({
@@ -124,7 +129,7 @@ const approveRequest = async (req, res) => {
       });
     }
 
-    // SECURITY CHECK
+    // CHECK STUDENT BELONGS TO THIS LIBRARY
     const student = await Student.findOne({
       _id: issue.studentId,
       collegeId: req.user.collegeId,
@@ -138,13 +143,6 @@ const approveRequest = async (req, res) => {
       });
     }
 
-    if (!issue) {
-      return res.status(404).json({
-        success: false,
-        message: "Request not found",
-      });
-    }
-
     if (issue.status !== "pending") {
       return res.status(400).json({
         success: false,
@@ -152,7 +150,12 @@ const approveRequest = async (req, res) => {
       });
     }
 
-    const book = await Book.findById(issue.bookId);
+    // CHECK BOOK BELONGS TO THIS LIBRARY
+    const book = await Book.findOne({
+      _id: issue.bookId,
+      collegeId: req.user.collegeId,
+      libraryId: req.user.libraryId,
+    });
 
     if (!book) {
       return res.status(404).json({
@@ -171,6 +174,7 @@ const approveRequest = async (req, res) => {
         message: "Book not available. Request rejected automatically.",
       });
     }
+
     if (student.status !== "active") {
       return res.status(400).json({
         success: false,
@@ -178,9 +182,12 @@ const approveRequest = async (req, res) => {
       });
     }
 
+    // CHECK IF ALREADY ISSUED
     const alreadyIssued = await Issue.findOne({
       studentId: issue.studentId,
       bookId: issue.bookId,
+      collegeId: req.user.collegeId,
+      libraryId: req.user.libraryId,
       status: "issued",
     });
 
@@ -197,7 +204,6 @@ const approveRequest = async (req, res) => {
 
     // CREATE DUE DATE
     const dueDate = new Date();
-
     dueDate.setDate(dueDate.getDate() + 90);
 
     // UPDATE ISSUE
@@ -207,9 +213,9 @@ const approveRequest = async (req, res) => {
     issue.issuedBy = req.user.id;
 
     await issue.save();
+
     // REDUCE BOOK COPIES
     book.availableCopies -= 1;
-
     await book.save();
 
     return res.status(200).json({
@@ -225,7 +231,6 @@ const approveRequest = async (req, res) => {
     });
   }
 };
-
 // ==========================================
 // ADMIN REJECT REQUEST
 // ==========================================
@@ -452,7 +457,12 @@ const returnBookRequest = async (req, res) => {
 
     const studentId = req.user.id;
 
-    const issue = await Issue.findById(issueId);
+    // FIND ISSUE ONLY FROM CURRENT COLLEGE & LIBRARY
+    const issue = await Issue.findOne({
+      _id: issueId,
+      collegeId: req.user.collegeId,
+      libraryId: req.user.libraryId,
+    });
 
     if (!issue) {
       return res.status(404).json({
@@ -461,7 +471,7 @@ const returnBookRequest = async (req, res) => {
       });
     }
 
-    // SECURITY CHECK
+    // VERIFY STUDENT OWNS THIS ISSUE
     if (issue.studentId.toString() !== studentId) {
       return res.status(403).json({
         success: false,
@@ -494,9 +504,7 @@ const returnBookRequest = async (req, res) => {
       error: error.message,
     });
   }
-};
-
-// ==========================================
+}; // ==========================================
 // ADMIN GET RETURN REQUESTS
 // ==========================================
 const getReturnRequests = async (req, res) => {
