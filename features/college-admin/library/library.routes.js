@@ -7,6 +7,7 @@ const libraryController = require("./library.controller");
 const isCollegeAdmin = require("../../../shared/middleware/isCollegeAdmin");
 
 const validate = require("../../../shared/middleware/form.validation");
+const auth = require("../../../shared/middleware/auth");
 
 const {
   createLibraryValidationSchema,
@@ -19,6 +20,7 @@ const {
 
 router.post(
   "/create-library",
+  auth,
   isCollegeAdmin,
   validate(createLibraryValidationSchema),
   libraryController.registerLibrary,
@@ -28,7 +30,12 @@ router.post(
 // GET ALL LIBRARIES
 // ==========================================
 
-router.get("/all-libraries", isCollegeAdmin, libraryController.getLibraries);
+router.get(
+  "/all-libraries",
+  auth,
+  isCollegeAdmin,
+  libraryController.getLibraries,
+);
 
 // ==========================================
 // UPDATE LIBRARY
@@ -36,6 +43,7 @@ router.get("/all-libraries", isCollegeAdmin, libraryController.getLibraries);
 
 router.patch(
   "/update-library/:id",
+  auth,
   isCollegeAdmin,
   validate(updateLibraryValidationSchema),
   libraryController.updateLibrary,
@@ -47,6 +55,7 @@ router.patch(
 
 router.delete(
   "/remove-library/:id",
+  auth,
   isCollegeAdmin,
   libraryController.deleteLibrary,
 );

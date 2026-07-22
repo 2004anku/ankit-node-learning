@@ -5,8 +5,8 @@ const router = express.Router();
 const libraryAdminController = require("./library.admin.controller");
 
 const validate = require("../../../shared/middleware/form.validation");
-
-const isSuperAdmin = require("../../../shared/middleware/isSuperAdmin");
+const isCollegeAdmin = require("../../../shared/middleware/isCollegeAdmin");
+const auth = require("../../../shared/middleware/auth");
 
 const {
   createLibraryAdminValidationSchema,
@@ -19,7 +19,8 @@ const {
 
 router.post(
   "/create-library-admin",
-  isSuperAdmin,
+  auth,
+  isCollegeAdmin,
   validate(createLibraryAdminValidationSchema),
   libraryAdminController.createLibraryAdmin,
 );
@@ -30,7 +31,8 @@ router.post(
 
 router.get(
   "/all-library-admins",
-  isSuperAdmin,
+  auth,
+  isCollegeAdmin,
   libraryAdminController.getAllLibraryAdmins,
 );
 
@@ -38,7 +40,12 @@ router.get(
 // GET SINGLE LIBRARY ADMIN
 // ==========================================
 
-router.get("/:id", isSuperAdmin, libraryAdminController.getSingleLibraryAdmin);
+router.get(
+  "/:id",
+  isCollegeAdmin,
+  auth,
+  libraryAdminController.getSingleLibraryAdmin,
+);
 
 // ==========================================
 // UPDATE LIBRARY ADMIN
@@ -46,7 +53,8 @@ router.get("/:id", isSuperAdmin, libraryAdminController.getSingleLibraryAdmin);
 
 router.patch(
   "/update-library-admin/:id",
-  isSuperAdmin,
+  auth,
+  isCollegeAdmin,
   validate(updateLibraryAdminValidationSchema),
   libraryAdminController.updateLibraryAdmin,
 );
@@ -57,7 +65,8 @@ router.patch(
 
 router.delete(
   "/remove-library-admin/:id",
-  isSuperAdmin,
+  auth,
+  isCollegeAdmin,
   libraryAdminController.deleteLibraryAdmin,
 );
 
