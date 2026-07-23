@@ -10,6 +10,7 @@ const validate = require("../../../shared/middleware/form.validation");
 
 const {
   createCollegeAdminValidationSchema,
+  updateCollegeAdminValidationSchema,
 } = require("./college.admin.validation");
 
 // CREATE COLLEGE ADMIN
@@ -19,5 +20,16 @@ router.post(
   validate(createCollegeAdminValidationSchema),
   collegeAdminController.createCollegeAdmin,
 );
+router.get(
+  "/all-college-admins",
+  isSuperAdmin,
+  collegeAdminController.getCollegeAdmins,
+);
 
+router.patch(
+  "/update-college-admin/:id",
+  isSuperAdmin,
+  validate(updateCollegeAdminValidationSchema),
+  collegeAdminController.updateCollegeAdmin,
+);
 module.exports = router;

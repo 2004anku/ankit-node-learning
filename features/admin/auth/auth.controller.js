@@ -6,7 +6,9 @@ const login = async (req, res) => {
     const { email, password } = req.body;
 
     // FIND USER
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email })
+      .populate("collegeId", "collegeName")
+      .populate("libraryId", "libraryName");
 
     if (!user) {
       return res.status(401).json({
@@ -45,8 +47,12 @@ const login = async (req, res) => {
       fullName: user.fullName,
       email: user.email,
       role: user.role,
-      collegeId: user.collegeId,
-      libraryId: user.libraryId,
+
+      collegeId: user.collegeId?._id || null,
+      libraryId: user.libraryId?._id || null,
+
+      collegeName: user.collegeId?.collegeName || "",
+      libraryName: user.libraryId?.libraryName || "",
     };
 
     return res.status(200).json({

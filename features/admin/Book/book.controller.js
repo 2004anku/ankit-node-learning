@@ -2,11 +2,32 @@ const Book = require("./book.model");
 const bookValidationSchema = require("./book.validation");
 const Library = require("../../college-admin/library/library.model");
 
-// ADD BOOK
+// ==========================================
+// CREATE BOOK
+// ==========================================
+
 const addBook = async (req, res) => {
   try {
     const { bookName, author, category, isbn, totalCopies, price } = req.body;
-    console.log(req.user);
+
+    const collegeId = req.user.collegeId._id || req.user.collegeId;
+    const libraryId = req.user.libraryId._id || req.user.libraryId;
+
+    // CHECK IF ISBN ALREADY EXISTS IN THIS LIBRARY
+    const existingBook = await Book.findOne({
+      isbn,
+      libraryId,
+      isDeleted: false,
+    });
+
+    if (existingBook) {
+      return res.status(409).json({
+        success: false,
+        message: "A book with this ISBN already exists in this library.",
+      });
+    }
+
+    // CREATE BOOK
     const newBook = await Book.create({
       bookName,
       author,
@@ -15,9 +36,8 @@ const addBook = async (req, res) => {
       totalCopies,
       availableCopies: totalCopies,
       price,
-      // Automatically assign from logged-in admin
-      collegeId: req.user.collegeId,
-      libraryId: req.user.libraryId,
+      collegeId,
+      libraryId,
     });
 
     return res.status(201).json({
@@ -26,6 +46,16 @@ const addBook = async (req, res) => {
       data: newBook,
     });
   } catch (error) {
+    console.error("BOOK ERROR:", error);
+
+    // HANDLE DUPLICATE KEY ERROR
+    if (error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: "A book with this ISBN already exists.",
+      });
+    }
+
     return res.status(500).json({
       success: false,
       message: "Error while adding book",
