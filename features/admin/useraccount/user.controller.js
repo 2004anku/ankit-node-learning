@@ -1,5 +1,8 @@
 const User = require("./user.model");
 const userValidationSchema = require("./user.validation");
+const College = require("../../super-admin/college/college.model");
+const Library = require("../../college-admin/library/library.model");
+
 // CREATE USER ACCOUNT
 const createUserAccount = async (req, res) => {
   try {
@@ -134,9 +137,80 @@ const deleteUserAccount = async (req, res) => {
   }
 };
 
+// ==========================================
+// GET LOGGED-IN ADMIN PROFILE
+// ==========================================
+const getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id)
+      .select("-password")
+      .populate("collegeId")
+      .populate("libraryId");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "Admin not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile fetched successfully",
+      data: user,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching profile",
+      error: error.message,
+    });
+  }
+};
+
+// ==========================================
+// UPDATE LOGGED IN USER PROFILE
+// ==========================================
+
+const updateProfile = async (req, res) => {
+  try {
+    const { fullName, phone, gender } = req.body;
+
+    const updatedProfile = await User.findByIdAndUpdate(
+      req.user.id,
+      {
+        fullName,
+        phone,
+        gender,
+      },
+      {
+        new: true,
+        runValidators: true,
+      },
+    )
+      .select("-password")
+      .populate("collegeId")
+      .populate("libraryId");
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: updatedProfile,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error updating profile",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   createUserAccount,
   getAllUserAccounts,
   updateUserAccount,
   deleteUserAccount,
+  getProfile,
+  updateProfile,
 };

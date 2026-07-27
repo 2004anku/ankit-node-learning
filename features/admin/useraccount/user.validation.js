@@ -1,7 +1,10 @@
 const Joi = require("joi");
 
-const userValidationSchema = Joi.object({
-  name: Joi.string().trim().required(),
+// ==========================================
+// CREATE USER
+// ==========================================
+const createUserValidationSchema = Joi.object({
+  fullName: Joi.string().min(2).max(50).required(),
 
   email: Joi.string().email().required(),
 
@@ -9,7 +12,50 @@ const userValidationSchema = Joi.object({
 
   role: Joi.string()
     .valid("super-admin", "college-admin", "library-admin", "student")
-    .optional(),
+    .required(),
+
+  phone: Joi.string(),
+
+  gender: Joi.string().valid("male", "female", "other"),
 });
 
-module.exports = userValidationSchema;
+// ==========================================
+// UPDATE USER (Super Admin)
+// ==========================================
+const updateUserValidationSchema = Joi.object({
+  fullName: Joi.string().min(2).max(50),
+
+  email: Joi.string().email(),
+
+  password: Joi.string().min(6),
+
+  phone: Joi.string(),
+
+  gender: Joi.string().valid("male", "female", "other"),
+
+  role: Joi.string().valid(
+    "super-admin",
+    "college-admin",
+    "library-admin",
+    "student",
+  ),
+
+  isActive: Joi.boolean(),
+});
+
+// ==========================================
+// UPDATE PROFILE (Library Admin)
+// ==========================================
+const updateProfileValidationSchema = Joi.object({
+  fullName: Joi.string().min(2).max(50),
+
+  phone: Joi.string(),
+
+  gender: Joi.string().valid("male", "female", "other"),
+});
+
+module.exports = {
+  createUserValidationSchema,
+  updateUserValidationSchema,
+  updateProfileValidationSchema,
+};
