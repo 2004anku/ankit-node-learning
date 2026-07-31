@@ -12,6 +12,28 @@ const getDashboardStats = async (req, res) => {
       libraryId: req.user.libraryId,
     };
 
+    // CHECK ALL ISSUES
+    const allIssues = await Issue.find().select(
+      "fine finePaid status collegeId libraryId",
+    );
+
+    // CHECK AGGREGATION RESULT
+    const debugFine = await Issue.aggregate([
+      {
+        $match: {
+          finePaid: false,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalFine: {
+            $sum: "$fine",
+          },
+        },
+      },
+    ]);
+
     const [
       totalStudents,
       totalBooks,
@@ -21,34 +43,33 @@ const getDashboardStats = async (req, res) => {
       fineData,
       availableBooksData,
     ] = await Promise.all([
-      // TOTAL STUDENTS
       Student.countDocuments(filter),
 
-      // TOTAL BOOKS
       Book.countDocuments(filter),
 
-      // TOTAL ISSUED BOOKS
       Issue.countDocuments({
         ...filter,
         status: "issued",
       }),
 
-      // TOTAL PENDING REQUESTS
       Issue.countDocuments({
         ...filter,
         status: "pending",
       }),
 
-      // TOTAL RETURN REQUESTS
       Issue.countDocuments({
         ...filter,
         status: "return-pending",
       }),
 
-      // TOTAL PENDING FINE
-      Student.aggregate([
+      Issue.aggregate([
         {
-          $match: filter,
+          $match: {
+            ...filter,
+            status: "returned",
+            finePaid: false,
+            fine: { $gt: 0 },
+          },
         },
         {
           $group: {
@@ -60,7 +81,6 @@ const getDashboardStats = async (req, res) => {
         },
       ]),
 
-      // TOTAL AVAILABLE BOOK COPIES
       Book.aggregate([
         {
           $match: filter,
@@ -96,7 +116,6 @@ const getDashboardStats = async (req, res) => {
     });
   }
 };
-
 // ==========================================
 // SEARCH STUDENTS
 // ==========================================

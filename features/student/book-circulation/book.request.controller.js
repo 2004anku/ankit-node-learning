@@ -1,19 +1,32 @@
 const BookCirculation = require("../../admin/book-circulation/book.circulation.model");
-
 const Book = require("../../admin/book/book.model");
+const Student = require("../../admin/student/student.model");
 
-// ================= REQUEST BOOK ISSUE =================
-
+// ==========================================
+// STUDENT REQUEST BOOK
+// ==========================================
 const requestBookIssue = async (req, res) => {
   try {
-    // GET LOGGED IN STUDENT ID
     const studentId = req.user.id;
-
-    // GET BOOK ID
     const { bookId } = req.body;
 
-    // CHECK BOOK EXISTS
-    const book = await Book.findById(bookId);
+    // FIND STUDENT
+    const student = await Student.findById(studentId);
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: "Student not found",
+      });
+    }
+
+    // FIND BOOK IN STUDENT'S LIBRARY
+    const book = await Book.findOne({
+      _id: bookId,
+      collegeId: student.collegeId,
+      libraryId: student.libraryId,
+      isDeleted: false,
+    });
 
     if (!book) {
       return res.status(404).json({
@@ -22,7 +35,7 @@ const requestBookIssue = async (req, res) => {
       });
     }
 
-    // CHECK BOOK STOCK
+    // CHECK BOOK AVAILABILITY
     if (book.availableCopies <= 0) {
       return res.status(400).json({
         success: false,
@@ -30,12 +43,12 @@ const requestBookIssue = async (req, res) => {
       });
     }
 
-    // CHECK ALREADY REQUESTED
+    // CHECK FOR EXISTING ACTIVE REQUEST
     const alreadyRequested = await BookCirculation.findOne({
       studentId,
       bookId,
       status: {
-        $in: ["pending", "issued"],
+        $in: ["pending", "issued", "return-pending"],
       },
     });
 
@@ -46,11 +59,13 @@ const requestBookIssue = async (req, res) => {
       });
     }
 
-    // CREATE REQUEST
+    // CREATE BOOK REQUEST
     const request = await BookCirculation.create({
-      studentId,
+      studentId: student._id,
       bookId,
       status: "pending",
+      collegeId: student.collegeId,
+      libraryId: student.libraryId,
     });
 
     return res.status(201).json({
@@ -67,8 +82,9 @@ const requestBookIssue = async (req, res) => {
   }
 };
 
-// ================= GET MY BOOKS =================
-
+// ==========================================
+// GET MY ISSUED BOOKS
+// ==========================================
 const getMyBooks = async (req, res) => {
   try {
     const books = await BookCirculation.find({
@@ -90,12 +106,12 @@ const getMyBooks = async (req, res) => {
   }
 };
 
-// ================= RETURN BOOK REQUEST =================
-
+// ==========================================
+// STUDENT RETURN BOOK REQUEST
+// ==========================================
 const returnBookRequest = async (req, res) => {
   try {
     const studentId = req.user.id;
-
     const { issueId } = req.params;
 
     const issue = await BookCirculation.findById(issueId);
@@ -107,7 +123,7 @@ const returnBookRequest = async (req, res) => {
       });
     }
 
-    // SECURITY CHECK
+    // VERIFY BOOK BELONGS TO LOGGED-IN STUDENT
     if (issue.studentId.toString() !== studentId.toString()) {
       return res.status(403).json({
         success: false,
@@ -115,7 +131,7 @@ const returnBookRequest = async (req, res) => {
       });
     }
 
-    // CHECK ALREADY PENDING
+    // CHECK IF RETURN REQUEST ALREADY EXISTS
     if (issue.status === "return-pending") {
       return res.status(400).json({
         success: false,
@@ -123,7 +139,7 @@ const returnBookRequest = async (req, res) => {
       });
     }
 
-    // ONLY ISSUED BOOK CAN BE RETURNED
+    // ONLY ISSUED BOOKS CAN BE RETURNED
     if (issue.status !== "issued") {
       return res.status(400).json({
         success: false,
@@ -131,7 +147,7 @@ const returnBookRequest = async (req, res) => {
       });
     }
 
-    // SEND RETURN REQUEST
+    // UPDATE STATUS
     issue.status = "return-pending";
 
     await issue.save();

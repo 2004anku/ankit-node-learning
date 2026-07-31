@@ -10,7 +10,6 @@ const bookRoutes = require("./features/admin/book/book.routes");
 const issueRoutes = require("./features/admin/book-circulation/book.circulation.routes");
 const studentRoutes = require("./features/admin/student/student.routes");
 const dashboardRoutes = require("./features/admin/dashboard/dashboard.routes");
-const profileRoutes = require("./features/admin/profile/profile.routes");
 
 const studentRoute = require("./features/student/student/student.routes");
 

@@ -32,8 +32,8 @@ const login = async (req, res) => {
       {
         id: user._id,
         role: user.role,
-        collegeId: user.collegeId,
-        libraryId: user.libraryId,
+        collegeId: user.collegeId?._id,
+        libraryId: user.libraryId?._id,
       },
       process.env.JWT_SECRET,
       {

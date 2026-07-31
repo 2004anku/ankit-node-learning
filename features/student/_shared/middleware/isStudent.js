@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 
 const isStudent = (req, res, next) => {
   try {
-    // GET TOKEN
+    // GET TOKEN FROM AUTHORIZATION HEADER
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -12,11 +12,13 @@ const isStudent = (req, res, next) => {
       });
     }
 
+    // EXTRACT TOKEN
     const token = authHeader.split(" ")[1];
+
     // VERIFY TOKEN
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // CHECK ROLE
+    // ALLOW ONLY STUDENTS
     if (decoded.role !== "student") {
       return res.status(403).json({
         success: false,
@@ -24,10 +26,12 @@ const isStudent = (req, res, next) => {
       });
     }
 
-    // STORE USER DATA
+    // STORE USER DATA FOR NEXT MIDDLEWARE / CONTROLLER
     req.user = {
       id: decoded.id,
       role: decoded.role,
+      collegeId: decoded.collegeId,
+      libraryId: decoded.libraryId,
     };
 
     next();

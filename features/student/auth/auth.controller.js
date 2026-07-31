@@ -32,10 +32,12 @@ const studentLogin = async (req, res) => {
       {
         id: student._id,
         role: "student",
+        collegeId: student.collegeId,
+        libraryId: student.libraryId,
       },
       process.env.JWT_SECRET,
       {
-        expiresIn: "7d",
+        expiresIn: "1d",
       },
     );
 

@@ -10,15 +10,32 @@ const requestBook = async (req, res) => {
   try {
     const { bookId } = req.body;
 
-    // STUDENT ID FROM TOKEN
-    const studentId = req.user.id;
+    // CHECK BOOK ID
+    if (!bookId) {
+      return res.status(400).json({
+        success: false,
+        message: "Book ID is required",
+      });
+    }
 
-    // CHECK BOOK
+    // FIND STUDENT
+    const student = await Student.findById(req.user.id);
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: "Student not found",
+      });
+    }
+
+    // FIND BOOK
     const book = await Book.findOne({
       _id: bookId,
-      collegeId: req.user.collegeId,
-      libraryId: req.user.libraryId,
+      collegeId: student.collegeId,
+      libraryId: student.libraryId,
+      isDeleted: false,
     });
+
     if (!book) {
       return res.status(404).json({
         success: false,
@@ -26,9 +43,17 @@ const requestBook = async (req, res) => {
       });
     }
 
-    // CHECK EXISTING REQUEST OR ISSUE
+    // CHECK BOOK AVAILABILITY
+    if (book.availableCopies <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Book is currently unavailable",
+      });
+    }
+
+    // CHECK FOR EXISTING ACTIVE REQUEST
     const existingRequest = await Issue.findOne({
-      studentId,
+      studentId: student._id,
       bookId,
       status: {
         $in: ["pending", "issued", "return-pending"],
@@ -38,18 +63,17 @@ const requestBook = async (req, res) => {
     if (existingRequest) {
       return res.status(400).json({
         success: false,
-        message: "Request already exists for this book",
+        message: "You already have an active request for this book",
       });
     }
 
-    // CREATE REQUEST
+    // CREATE BOOK REQUEST
     const request = await Issue.create({
-      studentId,
+      studentId: student._id,
       bookId,
       status: "pending",
-
-      collegeId: req.user.collegeId,
-      libraryId: req.user.libraryId,
+      collegeId: student.collegeId,
+      libraryId: student.libraryId,
     });
 
     return res.status(201).json({
@@ -65,7 +89,6 @@ const requestBook = async (req, res) => {
     });
   }
 };
-
 // ==========================================
 // ADMIN GET ALL PENDING REQUESTS
 // ==========================================
@@ -504,7 +527,8 @@ const returnBookRequest = async (req, res) => {
       error: error.message,
     });
   }
-}; // ==========================================
+};
+// ==========================================
 // ADMIN GET RETURN REQUESTS
 // ==========================================
 const getReturnRequests = async (req, res) => {
