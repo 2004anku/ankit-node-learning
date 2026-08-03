@@ -5,6 +5,7 @@ const Issue = require("../book-circulation/book.circulation.model");
 // ==========================================
 // DASHBOARD STATS
 // ==========================================
+
 const getDashboardStats = async (req, res) => {
   try {
     const filter = {
@@ -12,35 +13,13 @@ const getDashboardStats = async (req, res) => {
       libraryId: req.user.libraryId,
     };
 
-    // CHECK ALL ISSUES
-    const allIssues = await Issue.find().select(
-      "fine finePaid status collegeId libraryId",
-    );
-
-    // CHECK AGGREGATION RESULT
-    const debugFine = await Issue.aggregate([
-      {
-        $match: {
-          finePaid: false,
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          totalFine: {
-            $sum: "$fine",
-          },
-        },
-      },
-    ]);
-
     const [
       totalStudents,
       totalBooks,
       booksIssued,
       pendingRequests,
       returnRequests,
-      fineData,
+      fineIssues,
       availableBooksData,
     ] = await Promise.all([
       Student.countDocuments(filter),
@@ -62,24 +41,11 @@ const getDashboardStats = async (req, res) => {
         status: "return-pending",
       }),
 
-      Issue.aggregate([
-        {
-          $match: {
-            ...filter,
-            status: "returned",
-            finePaid: false,
-            fine: { $gt: 0 },
-          },
-        },
-        {
-          $group: {
-            _id: null,
-            totalFine: {
-              $sum: "$fine",
-            },
-          },
-        },
-      ]),
+      Issue.find({
+        ...filter,
+        finePaid: false,
+        fine: { $gt: 0 },
+      }).select("fine"),
 
       Book.aggregate([
         {
@@ -96,6 +62,11 @@ const getDashboardStats = async (req, res) => {
       ]),
     ]);
 
+    const totalFinePending = fineIssues.reduce(
+      (total, issue) => total + issue.fine,
+      0,
+    );
+
     return res.status(200).json({
       success: true,
       data: {
@@ -105,7 +76,7 @@ const getDashboardStats = async (req, res) => {
         booksIssued,
         pendingRequests,
         returnRequests,
-        totalFinePending: fineData[0]?.totalFine || 0,
+        totalFinePending,
       },
     });
   } catch (error) {
@@ -116,9 +87,11 @@ const getDashboardStats = async (req, res) => {
     });
   }
 };
+
 // ==========================================
 // SEARCH STUDENTS
 // ==========================================
+
 const searchStudents = async (req, res) => {
   try {
     const { q } = req.query;
