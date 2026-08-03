@@ -12,8 +12,10 @@ const createLibraryAdmin = async (req, res) => {
     const { fullName, email, password, phone, libraryId, isActive } = req.body;
 
     // CHECK LIBRARY EXISTS
-    const library = await Library.findById(libraryId);
-
+    const library = await Library.findOne({
+      _id: libraryId,
+      collegeId: req.user.collegeId,
+    });
     if (!library) {
       return res.status(404).json({
         success: false,
@@ -89,7 +91,10 @@ const createLibraryAdmin = async (req, res) => {
 
 const getAllLibraryAdmins = async (req, res) => {
   try {
-    const libraryAdmins = await User.find({ role: "library-admin" })
+    const libraryAdmins = await User.find({
+      role: "library-admin",
+      collegeId: req.user.collegeId,
+    })
       .select("-password")
       .populate({
         path: "collegeId",
@@ -119,7 +124,11 @@ const getAllLibraryAdmins = async (req, res) => {
 // ==========================================
 const getSingleLibraryAdmin = async (req, res) => {
   try {
-    const libraryAdmin = await User.findById(req.params.id)
+    const libraryAdmin = await User.findOne({
+      _id: req.params.id,
+      role: "library-admin",
+      collegeId: req.user.collegeId,
+    })
       .select("-password")
       .populate({
         path: "collegeId",
@@ -165,7 +174,10 @@ const updateLibraryAdmin = async (req, res) => {
 
     // IF LIBRARY CHANGED
     if (req.body.libraryId) {
-      const library = await Library.findById(req.body.libraryId);
+      const library = await Library.findOne({
+        _id: req.body.libraryId,
+        collegeId: req.user.collegeId,
+      });
 
       if (!library) {
         return res.status(404).json({
@@ -186,6 +198,7 @@ const updateLibraryAdmin = async (req, res) => {
       {
         _id: req.params.id,
         role: "library-admin",
+        collegeId: req.user.collegeId,
       },
       req.body,
       {
@@ -224,6 +237,7 @@ const deleteLibraryAdmin = async (req, res) => {
     const deletedLibraryAdmin = await User.findOneAndDelete({
       _id: req.params.id,
       role: "library-admin",
+      collegeId: req.user.collegeId,
     });
 
     if (!deletedLibraryAdmin) {

@@ -1,4 +1,5 @@
 const Student = require("../../admin/student/student.model");
+const Issue = require("../../admin/book-circulation/book.circulation.model");
 
 const Book = require("../../admin/book/book.model");
 
@@ -20,15 +21,15 @@ const getStudentProfile = async (req, res) => {
   }
 };
 
-const Issue = require("../../admin/book-circulation/book.circulation.model");
 // ================= GET ALL LIBRARY BOOKS =================
-
 const getAllBooks = async (req, res) => {
   try {
-    // FETCH ALL BOOKS
-    const books = await Book.find();
+    const books = await Book.find({
+      collegeId: req.user.collegeId,
+      libraryId: req.user.libraryId,
+      isDeleted: false,
+    }).sort({ createdAt: -1 });
 
-    // RESPONSE
     return res.status(200).json({
       success: true,
       count: books.length,
@@ -42,6 +43,7 @@ const getAllBooks = async (req, res) => {
     });
   }
 };
+
 module.exports = {
   getStudentProfile,
   getAllBooks,
