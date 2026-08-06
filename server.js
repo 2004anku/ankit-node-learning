@@ -20,7 +20,7 @@ const collegeAdminRoutes = require("./features/super-admin/college-admin/college
 const libraryRoutes = require("./features/college-admin/library/library.routes");
 const libraryAdminRoutes = require("./features/college-admin/library-admin/library.admin.routes");
 const collegeAdminAuthRoutes = require("./features/college-admin/auth/auth.routes");
-
+const dataTransferRoutes = require("./features/admin/data-transfer/data.transfer.routes");
 const app = express();
 
 /* ------------------------- DATABASE CONNECTION ------------------------- */
@@ -48,6 +48,7 @@ app.use("/api/1/admin/books", bookRoutes);
 app.use("/api/1/admin/book-circulation", issueRoutes);
 app.use("/api/1/admin/student", studentRoutes);
 app.use("/api/1/admin/dashboard", dashboardRoutes);
+app.use("/api/1/admin/data-transfer", dataTransferRoutes);
 
 // Student
 app.use("/api/1/students", studentRoute);

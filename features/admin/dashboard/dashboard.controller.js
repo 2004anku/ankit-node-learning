@@ -13,6 +13,16 @@ const getDashboardStats = async (req, res) => {
       libraryId: req.user.libraryId,
     };
 
+    const studentFilter = {
+      ...filter,
+      isDeleted: false,
+    };
+
+    const bookFilter = {
+      ...filter,
+      isDeleted: false,
+    };
+
     const [
       totalStudents,
       totalBooks,
@@ -22,10 +32,9 @@ const getDashboardStats = async (req, res) => {
       fineIssues,
       availableBooksData,
     ] = await Promise.all([
-      Student.countDocuments(filter),
+      Student.countDocuments(studentFilter),
 
-      Book.countDocuments(filter),
-
+      Book.countDocuments(bookFilter),
       Issue.countDocuments({
         ...filter,
         status: "issued",
@@ -49,7 +58,7 @@ const getDashboardStats = async (req, res) => {
 
       Book.aggregate([
         {
-          $match: filter,
+          $match: bookFilter,
         },
         {
           $group: {
