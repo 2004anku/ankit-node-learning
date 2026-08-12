@@ -72,17 +72,29 @@ const previewBooks = async (req, res) => {
 
 const importBooks = async (req, res) => {
   try {
-    const { books } = req.body;
+    const previewData = req.body.data;
 
-    if (!books || !Array.isArray(books) || books.length === 0) {
+    if (
+      !previewData ||
+      !Array.isArray(previewData) ||
+      previewData.length === 0
+    ) {
       return res.status(400).json({
         success: false,
         message: "No books received.",
       });
     }
 
+    // Convert Preview JSON -> Raw Rows
+    const rows = previewData
+      .filter((item) => item.valid)
+      .map((item) => ({
+        rowNumber: item.rowNumber,
+        ...item.data,
+      }));
+
     const { booksToInsert, skippedBooks } = await prepareBooksForImport({
-      rows: books,
+      rows,
       libraryId: req.user.libraryId,
       collegeId: req.user.collegeId,
       validateBookRow,
@@ -96,7 +108,7 @@ const importBooks = async (req, res) => {
       success: true,
       message: "Books imported successfully.",
       summary: {
-        totalRows: books.length,
+        totalRows: previewData.length,
         inserted: booksToInsert.length,
         skipped: skippedBooks.length,
       },

@@ -14,7 +14,7 @@ const createUserValidationSchema = Joi.object({
     .valid("super-admin", "college-admin", "library-admin", "student")
     .required(),
 
-  phone: Joi.string(),
+  phone: Joi.string().pattern(/^\+[1-9]\d{7,14}$/),
 
   gender: Joi.string().valid("male", "female", "other"),
 });
@@ -29,7 +29,7 @@ const updateUserValidationSchema = Joi.object({
 
   password: Joi.string().min(6),
 
-  phone: Joi.string(),
+  phone: Joi.string().pattern(/^\+[1-9]\d{7,14}$/),
 
   gender: Joi.string().valid("male", "female", "other"),
 
@@ -49,7 +49,7 @@ const updateUserValidationSchema = Joi.object({
 const updateProfileValidationSchema = Joi.object({
   fullName: Joi.string().min(2).max(50),
 
-  phone: Joi.string(),
+  phone: Joi.string().pattern(/^\+[1-9]\d{7,14}$/),
 
   gender: Joi.string().valid("male", "female", "other"),
 });
