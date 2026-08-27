@@ -24,7 +24,6 @@ const requestBookIssue = async (req, res) => {
     const book = await Book.findOne({
       _id: bookId,
       collegeId: student.collegeId,
-      libraryId: student.libraryId,
       isDeleted: false,
     });
 

@@ -68,7 +68,6 @@ const getAllBooks = async (req, res) => {
   try {
     const books = await Book.find({
       collegeId: req.user.collegeId,
-      libraryId: req.user.libraryId,
       isDeleted: false,
     }).populate("libraryId");
     res.status(200).json({
