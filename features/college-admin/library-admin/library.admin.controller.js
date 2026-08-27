@@ -1,4 +1,4 @@
-const User = require("../../admin/useraccount/user.model");
+const User = require("../../user/user.model");
 const Library = require("../../college-admin/library/library.model");
 
 const bcrypt = require("bcrypt");
@@ -172,27 +172,70 @@ const updateLibraryAdmin = async (req, res) => {
       });
     }
 
-    // IF LIBRARY CHANGED
-    if (req.body.libraryId) {
+    // ==========================================
+    // ALLOWED FIELDS ONLY
+    // ==========================================
+
+    const allowedFields = [
+      "fullName",
+      "email",
+      "phone",
+      "password",
+      "libraryId",
+      "isActive",
+    ];
+
+    const updateData = {};
+
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        updateData[field] = req.body[field];
+      }
+    }
+
+    // ==========================================
+    // CHECK VALID UPDATE FIELDS
+    // ==========================================
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No valid fields provided for update",
+      });
+    }
+
+    // ==========================================
+    // IF LIBRARY IS CHANGED
+    // ==========================================
+
+    if (updateData.libraryId) {
       const library = await Library.findOne({
-        _id: req.body.libraryId,
+        _id: updateData.libraryId,
         collegeId: req.user.collegeId,
       });
 
       if (!library) {
         return res.status(404).json({
           success: false,
-          message: "Library not found",
+          message: "Library not found in your college",
         });
       }
 
-      req.body.collegeId = library.collegeId;
+      // We intentionally DO NOT accept collegeId
+      // from the client.
     }
 
+    // ==========================================
     // HASH PASSWORD IF UPDATED
-    if (req.body.password) {
-      req.body.password = await bcrypt.hash(req.body.password, 10);
+    // ==========================================
+
+    if (updateData.password) {
+      updateData.password = await bcrypt.hash(updateData.password, 10);
     }
+
+    // ==========================================
+    // UPDATE ONLY SAME-COLLEGE LIBRARY ADMIN
+    // ==========================================
 
     const updatedLibraryAdmin = await User.findOneAndUpdate(
       {
@@ -200,12 +243,21 @@ const updateLibraryAdmin = async (req, res) => {
         role: "library-admin",
         collegeId: req.user.collegeId,
       },
-      req.body,
+      updateData,
       {
         new: true,
         runValidators: true,
       },
-    );
+    )
+      .select("-password")
+      .populate({
+        path: "collegeId",
+        select: "collegeName collegeCode",
+      })
+      .populate({
+        path: "libraryId",
+        select: "libraryName",
+      });
 
     if (!updatedLibraryAdmin) {
       return res.status(404).json({

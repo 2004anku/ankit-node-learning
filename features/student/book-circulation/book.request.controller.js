@@ -1,6 +1,6 @@
-const BookCirculation = require("../../admin/book-circulation/book.circulation.model");
-const Book = require("../../admin/book/book.model");
-const Student = require("../../admin/student/student.model");
+const BookCirculation = require("../../library-admin/book-circulation/book.circulation.model");
+const Book = require("../../library-admin/book/book.model");
+const Student = require("../../library-admin/student/student.model");
 
 // ==========================================
 // STUDENT REQUEST BOOK

@@ -1,7 +1,7 @@
 {
-  "name": "node-first-app",
+  "name": "bookhub-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend API for BookHub, a multi-tenant SaaS library management system.",
   "homepage": "https://github.com/2004anku/Node_1#readme",
   "bugs": {
     "url": "https://github.com/2004anku/Node_1/issues"
@@ -11,9 +11,11 @@
     "url": "git+https://github.com/2004anku/Node_1.git"
   },
   "license": "ISC",
-  "author": "",
+  "author": {
+    "name": "Ankit Choudhary"
+  },
   "type": "commonjs",
-  "main": "first-app.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon server.js",

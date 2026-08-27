@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 
 const studentController = require("./student.controller");
-const isAdmin = require("../../../shared/middleware/isAdmin");
+const isLibraryAdmin = require("../../../shared/middleware/isLibraryAdmin");
 
 const validate = require("../../../shared/middleware/form.validation");
 const {
@@ -11,15 +11,19 @@ const {
   updateStudentValidationSchema,
 } = require("./student.validation");
 // GET ALL STUDENTS
-router.get("/all-student", isAdmin, studentController.getAllStudents);
+router.get("/all-student", isLibraryAdmin, studentController.getAllStudents);
 
 // GET SINGLE STUDENT
-router.get("/single-student/:id", isAdmin, studentController.getSingleStudent);
+router.get(
+  "/single-student/:id",
+  isLibraryAdmin,
+  studentController.getSingleStudent,
+);
 
 // CREATE STUDENT
 router.post(
   "/create-student",
-  isAdmin,
+  isLibraryAdmin,
   validate(createStudentValidationSchema),
   studentController.createStudent,
 );
@@ -27,21 +31,29 @@ router.post(
 // UPDATE STUDENT
 router.patch(
   "/update-student/:id",
-  isAdmin,
+  isLibraryAdmin,
   validate(updateStudentValidationSchema),
   studentController.updateStudent,
 );
 
 // DELETE STUDENT
-router.delete("/remove-student/:id", isAdmin, studentController.deleteStudent);
+router.delete(
+  "/remove-student/:id",
+  isLibraryAdmin,
+  studentController.deleteStudent,
+);
 // get profile
-router.get("/profile/:id", isAdmin, studentController.getStudentProfile);
+router.get("/profile/:id", isLibraryAdmin, studentController.getStudentProfile);
 // restore student
-router.patch("/restore-student/:id", isAdmin, studentController.restoreStudent);
+router.patch(
+  "/restore-student/:id",
+  isLibraryAdmin,
+  studentController.restoreStudent,
+);
 
 router.get(
   "/archived-students",
-  isAdmin,
+  isLibraryAdmin,
   studentController.getArchivedStudents,
 );
 

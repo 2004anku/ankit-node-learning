@@ -3,8 +3,7 @@ const router = express.Router();
 
 const bookController = require("./book.controller");
 
-const isAdmin = require("../../../shared/middleware/isAdmin");
-
+const isLibraryAdmin = require("../../../shared/middleware/isLibraryAdmin");
 const validate = require("../../../shared/middleware/form.validation");
 
 const {
@@ -15,27 +14,27 @@ const {
 // CREATE BOOK
 router.post(
   "/create-book",
-  isAdmin,
+  isLibraryAdmin,
   validate(createBookValidationSchema),
   bookController.addBook,
 );
 
 // GET ALL BOOKS
-router.get("/all-books", isAdmin, bookController.getAllBooks);
+router.get("/all-books", isLibraryAdmin, bookController.getAllBooks);
 // UPDATE BOOK
 router.patch(
   "/update-book/:id",
-  isAdmin,
+  isLibraryAdmin,
   validate(updateBookValidationSchema),
   bookController.updateBook,
 );
 
 // DELETE BOOK
-router.delete("/remove-book/:id", isAdmin, bookController.deleteBook);
+router.delete("/remove-book/:id", isLibraryAdmin, bookController.deleteBook);
 
 // ACHIVED BOOKS
-router.get("/archived-books", isAdmin, bookController.getArchivedBooks);
+router.get("/archived-books", isLibraryAdmin, bookController.getArchivedBooks);
 
 // RESTORE
-router.patch("/restore-book/:id", isAdmin, bookController.restoreBook);
+router.patch("/restore-book/:id", isLibraryAdmin, bookController.restoreBook);
 module.exports = router;

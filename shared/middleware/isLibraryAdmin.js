@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const isAdmin = (req, res, next) => {
+const isLibraryAdmin = (req, res, next) => {
   try {
     // GET TOKEN FROM AUTH HEADER
     const authHeader = req.headers.authorization;
@@ -18,7 +18,7 @@ const isAdmin = (req, res, next) => {
     // VERIFY TOKEN
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // ALLOW ONLY LIBRARY ADMIN
+    // ALLOW ONLY LIBRARIAN
     if (decoded.role !== "library-admin") {
       return res.status(403).json({
         success: false,
@@ -44,4 +44,4 @@ const isAdmin = (req, res, next) => {
   }
 };
 
-module.exports = isAdmin;
+module.exports = isLibraryAdmin;

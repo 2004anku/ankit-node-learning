@@ -11,7 +11,7 @@ const auth = require("../../../shared/middleware/auth");
 const {
   createLibraryAdminValidationSchema,
   updateLibraryAdminValidationSchema,
-} = require("./library.admin.validaiton");
+} = require("./library.admin.validation");
 
 // ==========================================
 // CREATE LIBRARY ADMIN

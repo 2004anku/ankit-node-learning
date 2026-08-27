@@ -38,7 +38,6 @@ const createStudent = async (req, res) => {
       course,
       semester,
       collegeId: req.user.collegeId,
-      libraryId: req.user.libraryId,
     });
 
     // REMOVE PASSWORD FROM RESPONSE
@@ -60,12 +59,10 @@ const createStudent = async (req, res) => {
 };
 
 // ================= GET ALL STUDENTS =================
-
 const getAllStudents = async (req, res) => {
   try {
     const students = await Student.find({
       collegeId: req.user.collegeId,
-      libraryId: req.user.libraryId,
       isDeleted: false,
     }).select("-password");
 
@@ -93,8 +90,9 @@ const getSingleStudent = async (req, res) => {
     const student = await Student.findOne({
       _id: id,
       collegeId: req.user.collegeId,
-      libraryId: req.user.libraryId,
+      isDeleted: false,
     }).select("-password");
+
     if (!student) {
       return res.status(404).json({
         success: false,
@@ -129,17 +127,44 @@ const updateStudent = async (req, res) => {
       });
     }
 
+    // ALLOWED STUDENT FIELDS
+    const allowedFields = [
+      "studentName",
+      "email",
+      "phone",
+      "course",
+      "semester",
+      "status",
+    ];
+
+    const updateData = {};
+
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        updateData[field] = req.body[field];
+      }
+    }
+
+    // HASH PASSWORD SEPARATELY
     if (req.body.password) {
-      req.body.password = await bcrypt.hash(req.body.password, 10);
+      updateData.password = await bcrypt.hash(req.body.password, 10);
+    }
+
+    // CHECK IF THERE IS ANY VALID FIELD TO UPDATE
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No valid fields provided for update",
+      });
     }
 
     const updatedStudent = await Student.findOneAndUpdate(
       {
         _id: id,
         collegeId: req.user.collegeId,
-        libraryId: req.user.libraryId,
+        isDeleted: false,
       },
-      req.body,
+      updateData,
       {
         new: true,
         runValidators: true,
@@ -177,7 +202,7 @@ const deleteStudent = async (req, res) => {
       {
         _id: id,
         collegeId: req.user.collegeId,
-        libraryId: req.user.libraryId,
+        isDeleted: false,
       },
       {
         isDeleted: true,
@@ -185,7 +210,7 @@ const deleteStudent = async (req, res) => {
       {
         new: true,
       },
-    );
+    ).select("-password");
 
     if (!deletedStudent) {
       return res.status(404).json({
@@ -207,6 +232,7 @@ const deleteStudent = async (req, res) => {
     });
   }
 };
+
 // ================= STUDENT PROFILE =================
 
 const getStudentProfile = async (req, res) => {
@@ -216,8 +242,9 @@ const getStudentProfile = async (req, res) => {
     const student = await Student.findOne({
       _id: id,
       collegeId: req.user.collegeId,
-      libraryId: req.user.libraryId,
+      isDeleted: false,
     }).select("-password");
+
     if (!student) {
       return res.status(404).json({
         success: false,
@@ -260,6 +287,8 @@ const getStudentProfile = async (req, res) => {
   }
 };
 
+// ================= RESTORE STUDENT =================
+
 const restoreStudent = async (req, res) => {
   try {
     const { id } = req.params;
@@ -268,7 +297,7 @@ const restoreStudent = async (req, res) => {
       {
         _id: id,
         collegeId: req.user.collegeId,
-        libraryId: req.user.libraryId,
+        isDeleted: true,
       },
       {
         isDeleted: false,
@@ -277,6 +306,13 @@ const restoreStudent = async (req, res) => {
         new: true,
       },
     ).select("-password");
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: "Archived student not found",
+      });
+    }
 
     return res.status(200).json({
       success: true,
@@ -291,18 +327,20 @@ const restoreStudent = async (req, res) => {
     });
   }
 };
+
 // ================= GET ARCHIVED STUDENTS =================
+
 const getArchivedStudents = async (req, res) => {
   try {
     const students = await Student.find({
       collegeId: req.user.collegeId,
-      libraryId: req.user.libraryId,
       isDeleted: true,
     }).select("-password");
 
     return res.status(200).json({
       success: true,
       message: "Archived students fetched successfully",
+      totalStudents: students.length,
       data: students,
     });
   } catch (error) {

@@ -1,7 +1,7 @@
-const Student = require("../../admin/student/student.model");
-const Issue = require("../../admin/book-circulation/book.circulation.model");
+const Student = require("../../library-admin/student/student.model");
+const Issue = require("../../library-admin/book-circulation/book.circulation.model");
 
-const Book = require("../../admin/book/book.model");
+const Book = require("../../library-admin/book/book.model");
 
 // ================= GET STUDENT PROFILE =================
 

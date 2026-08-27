@@ -4,7 +4,7 @@ const router = express.Router();
 
 const issueController = require("./book.circulation.controller");
 
-const isAdmin = require("../../../shared/middleware/isAdmin");
+const isLibraryAdmin = require("../../../shared/middleware/isLibraryAdmin");
 
 const isStudent = require("../../student/_shared/middleware/isStudent");
 
@@ -41,19 +41,23 @@ router.patch(
 // =====================================================
 
 // GET ALL PENDING BOOK REQUESTS
-router.get("/book-requests", isAdmin, issueController.getAllBookRequests);
+router.get(
+  "/book-requests",
+  isLibraryAdmin,
+  issueController.getAllBookRequests,
+);
 
 // APPROVE BOOK REQUEST
 router.patch(
   "/approve-request/:issueId",
-  isAdmin,
+  isLibraryAdmin,
   issueController.approveRequest,
 );
 
 // REJECT BOOK REQUEST
 router.patch(
   "/reject-request/:issueId",
-  isAdmin,
+  isLibraryAdmin,
   issueController.rejectRequest,
 );
 
@@ -62,12 +66,16 @@ router.patch(
 // =====================================================
 
 // GET ALL RETURN REQUESTS
-router.get("/return-requests", isAdmin, issueController.getReturnRequests);
+router.get(
+  "/return-requests",
+  isLibraryAdmin,
+  issueController.getReturnRequests,
+);
 
 // ACCEPT RETURN REQUEST
 router.patch(
   "/accept-return-request/:issueId",
-  isAdmin,
+  isLibraryAdmin,
   issueController.acceptReturnRequest,
 );
 
@@ -75,24 +83,32 @@ router.patch(
 // DIRECT ISSUE MANAGEMENT
 // =====================================================
 
-router.post("/assign-book", isAdmin, issueController.assignBookToStudent);
+router.post(
+  "/assign-book",
+  isLibraryAdmin,
+  issueController.assignBookToStudent,
+);
 
 // GET ALL ISSUED BOOKS
-router.get("/book-issued", isAdmin, issueController.getAllIssuedBooks);
+router.get("/book-issued", isLibraryAdmin, issueController.getAllIssuedBooks);
 
 // COLLECT FINE
-router.patch("/collect-fine/:issueId", isAdmin, issueController.collectFine);
+router.patch(
+  "/collect-fine/:issueId",
+  isLibraryAdmin,
+  issueController.collectFine,
+);
 
 // ADMIN UPDATE REQUEST STATUS
 router.patch(
   "/update-request-status/:issueId",
-  isAdmin,
+  isLibraryAdmin,
   issueController.updateRequestStatus,
 );
 
 router.delete(
   "/delete-request/:issueId",
-  isAdmin,
+  isLibraryAdmin,
   issueController.deleteRejectedRequest,
 );
 

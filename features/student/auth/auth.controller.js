@@ -1,4 +1,4 @@
-const Student = require("../../admin/student/student.model");
+const Student = require("../../library-admin/student/student.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 

@@ -1,4 +1,4 @@
-const Student = require("../../features/admin/student/student.model");
+const Student = require("../../features/library-admin/student/student.model");
 const bcrypt = require("bcrypt");
 const prepareStudentsForImport = async ({ rows, libraryId, collegeId }) => {
   const studentsToInsert = [];

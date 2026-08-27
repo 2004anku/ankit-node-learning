@@ -1,4 +1,4 @@
-const User = require("../../admin/useraccount/user.model");
+const User = require("../../user/user.model");
 const College = require("../college/college.model");
 
 const bcrypt = require("bcrypt");

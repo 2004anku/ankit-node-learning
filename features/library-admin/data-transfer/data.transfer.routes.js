@@ -6,7 +6,7 @@ const path = require("path");
 const fs = require("fs");
 
 const auth = require("../../../shared/middleware/auth");
-const isLibraryAdmin = require("../../../shared/middleware/isAdmin");
+const isLibraryAdmin = require("../../../shared/middleware/isLibraryAdmin");
 
 const dataTransferController = require("./data.transfer.controller");
 

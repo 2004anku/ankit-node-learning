@@ -4,20 +4,20 @@ const router = express.Router();
 
 const { getDashboardStats, searchStudents } = require("./dashboard.controller");
 
-const isAdmin = require("../../../shared/middleware/isAdmin");
+const isLibraryAdmin = require("../../../shared/middleware/isLibraryAdmin");
 
 // ==========================================
 // DASHBOARD
 // ==========================================
 
 // Dashboard Statistics
-router.get("/stats", isAdmin, getDashboardStats);
+router.get("/stats", isLibraryAdmin, getDashboardStats);
 
 // ==========================================
 // SEARCH
 // ==========================================
 
 // Search Students
-router.get("/search-students", isAdmin, searchStudents);
+router.get("/search-students", isLibraryAdmin, searchStudents);
 
 module.exports = router;
