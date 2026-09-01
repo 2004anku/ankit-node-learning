@@ -64,7 +64,7 @@ const requestBookIssue = async (req, res) => {
       bookId,
       status: "pending",
       collegeId: student.collegeId,
-      libraryId: student.libraryId,
+      libraryId: book.libraryId,
     });
 
     return res.status(201).json({

@@ -32,7 +32,6 @@ const requestBook = async (req, res) => {
     const book = await Book.findOne({
       _id: bookId,
       collegeId: student.collegeId,
-      libraryId: student.libraryId,
       isDeleted: false,
     });
 
@@ -73,7 +72,7 @@ const requestBook = async (req, res) => {
       bookId,
       status: "pending",
       collegeId: student.collegeId,
-      libraryId: student.libraryId,
+      libraryId: book.libraryId,
     });
 
     return res.status(201).json({

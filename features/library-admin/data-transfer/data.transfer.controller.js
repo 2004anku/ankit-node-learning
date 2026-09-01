@@ -241,7 +241,6 @@ const importStudents = async (req, res) => {
     const { studentsToInsert, skippedStudents } =
       await prepareStudentsForImport({
         rows,
-        libraryId: req.user.libraryId,
         collegeId: req.user.collegeId,
         validateStudentRow,
       });
